@@ -1,0 +1,47 @@
+.TH "scl" "1"
+.SH "NAME"
+scl \- Setup and run software from Software Collection environment
+.SH "SYNOPSIS"
+.PP
+\fBscl\fP \fI<action>\fR [\fI<collection1> <collection2> ...\fR] \fI<command>\fR
+.PP
+\fBscl\fP {\fB-l|--list\fP}
+.SH "DESCRIPTION"
+.PP
+This manual page documents \fBscl\fP, a
+program which is an utility for running software packaged as a Software Collection.
+.PP
+\fBscl\fP utility allows to execute an application which is not located in the filesystem
+root hierarchy but is present in an alternative location. This application can still use
+and benefit from software installed in the root filesystem. In order to let an application
+be visible to the system one has to use \fBscl\fP utility as an interface.
+.PP
+\fI<action>\fR is a script name to execute in a bash environment before the application
+itself takes in executed. Currently only \fBenable\fP scriptlet is mandatory which is needed
+to update search paths, etc.
+.PP
+One can enable more Software Collections if needed and therefore one can use multiple
+collections which are enabled by the left-right order as present on \fBscl\fP command-line.
+.PP
+\fI<command>\fR is an arbitrary command or set of commands to execute within the Software
+Collection environment enabled. Control is returned back to the caller with the original
+environment as soon as the command finishes. It \fI<command>\fR is '-' (dash) then it is
+read from the standard input.
+.SH "OPTIONS"
+.PP
+.IP "\fB-l, --list\fP" 10
+Lists all installed Software Collections on the system
+.SH "EXAMPLES"
+.TP
+scl enable example 'less --version'
+runs command 'less --version' in the environment with collection 'example' enabled
+.TP
+scl enable foo bar bash
+runs bash instance with foo and bar Software Collections enabled
+.TP
+cat my_command | scl enable baz -
+run set of commands listed in my_command file in the environment with baz Software Collection
+enabled
+.SH "AUTHOR"
+.PP
+\fBscl\fP was written by Jindrich Novy <jnovy@redhat.com>.
