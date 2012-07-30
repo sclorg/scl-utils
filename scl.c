@@ -66,7 +66,6 @@ static void list_collections() {
 		exit(EXIT_FAILURE);
 	}
 
-
 	if ((n = scandir(prefix, &nl, 0, alphasort)) < 0) {
 		perror("scandir");
 		exit(EXIT_FAILURE);
@@ -81,6 +80,114 @@ static void list_collections() {
 	free(nl);
 }
 
+static char **read_script_output( char *ori_cmd ) {
+	struct stat sb;
+	char tmp[] = "/var/tmp/sclXXXXXX";
+	char *m, **lines, *mp, *cmd;
+	int i, lp = 0, ls, tfd;
+	FILE *f;
+
+	tfd = mkstemp(tmp);
+	check_asprintf(&cmd, "%s > %s", ori_cmd, tmp);
+	i = system(cmd);
+	free(cmd);
+	free(ori_cmd);
+
+	if (stat(tmp, &sb) == -1) {
+		fprintf(stderr, "%s does not exist\n", tmp);
+		exit(EXIT_FAILURE);
+	}
+
+	if ((m = malloc(sb.st_size)) == NULL) {
+		fprintf(stderr, "Can't allocate memory.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	if ((f=fopen(tmp, "r")) == NULL || fread(m, 1, sb.st_size, f) < 1) {
+		fprintf(stderr, "Unable to read contents of temporary file.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	fclose(f);
+	close(tfd);
+	unlink(tmp);
+
+	ls = 0x100;
+	lines = malloc(ls*sizeof(char*));
+	*lines = NULL;
+
+	for (mp=m; mp && mp < &m[sb.st_size];) {
+		lines[lp++] = mp;
+		if (lp == ls-1 ) {
+			ls += 0x100;
+			lines = realloc(lines, ls*sizeof(char*));
+		}
+		mp = strchr(mp, '\n');
+		*mp = '\0';
+		mp++;
+	}
+
+	lines[lp] = NULL;
+	return lines;
+}
+
+static int list_packages_in_collection( const char *colname) {
+	struct stat sb;
+	struct dirent **nl;
+	int i, n, found;
+        const char prefix[] = "/etc/scl/prefixes/";
+	char *cmd, *m, **lines;
+	size_t cns;
+
+	if (stat(prefix, &sb) == -1) {
+		fprintf(stderr, "%s does not exist\n", prefix);
+		exit(EXIT_FAILURE);
+	}
+
+	if (!S_ISDIR(sb.st_mode)) {
+		fprintf(stderr, "%s is not a directory\n", prefix);
+		exit(EXIT_FAILURE);
+	}
+
+	if ((n = scandir(prefix, &nl, 0, alphasort)) < 0) {
+		perror("scandir");
+		exit(EXIT_FAILURE);
+	}
+
+	for (found=i=0; i<n; i++) {
+		if (*nl[i]->d_name != '.') {
+			if (!strcmp(nl[i]->d_name, colname)) {
+				found = 1;
+			}
+		}
+		free(nl[i]);
+	}
+
+	free(nl);
+
+	if (!found) {
+		fprintf(stderr, "warning: collection \"%s\" doesn't seem to be installed, checking anyway...\n", colname);
+	}
+
+	check_asprintf(&cmd, "rpm -qa --qf=\"%%{name}-%%{version}-%%{release}.%%{arch}\n%{sourcerpm}\n\"", colname);
+	lines = read_script_output(cmd);
+	if (!lines[0]) {
+		fprintf(stderr, "No package list from RPM received.\n", prefix);
+		exit(EXIT_FAILURE);
+	}
+
+	cns = strlen(colname);
+	for (i=1; lines[i-1] && lines[i]; i+=2) {
+		if (!strncmp(lines[i], colname, cns) && lines[i][cns] == '-') {
+			printf("%s\n", lines[i-1]);
+		}
+	}
+	free(*lines);
+	free(lines);
+
+	return 0;
+}
+
 int main(int argc, char **argv) {
 	struct stat st;
 	char *path, *enablepath;
@@ -88,9 +195,16 @@ int main(int argc, char **argv) {
 	char *cmd = NULL, *bash_cmd, *echo, *enabled;
 	int i, tfd, ffd, stdin_read = 0;
 
-	if (argc == 2 && (!strcmp(argv[1],"--list") || !strcmp(argv[1],"-l"))) {
-		list_collections();
-		return 0;
+	if (!strcmp(argv[1],"--list") || !strcmp(argv[1],"-l")) {
+		if (argc == 2) {
+			list_collections();
+		} else {
+			int i;
+
+			for (i=2; i<argc; i++)
+				list_packages_in_collection(argv[i]);
+		}
+		return EXIT_SUCCESS;
 	}
 
 	if (!strcmp(argv[argc-1], "-")) {	/* reading command from stdin */
@@ -184,7 +298,7 @@ int main(int argc, char **argv) {
 		if (ffd != -1) {
 			write_script(tfd, echo);
 		} else {
-			fprintf(stderr, "WARNING: %s scriptlet does not exist!\n", enablepath);
+			fprintf(stderr, "warning: %s scriptlet does not exist!\n", enablepath);
 			unlink(tmp);
 			exit(EXIT_FAILURE);
 		}
