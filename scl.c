@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
 	char *cmd = NULL, *bash_cmd, *echo, *enabled;
 	int i, tfd, ffd, stdin_read = 0;
 
-	if (!strcmp(argv[1],"--list") || !strcmp(argv[1],"-l")) {
+	if (!strcmp(argv[argc-1],"--list") || !strcmp(argv[argc-1],"-l")) {
 		if (argc == 2) {
 			list_collections();
 		} else {
