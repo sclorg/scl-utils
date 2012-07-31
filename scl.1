@@ -30,7 +30,8 @@ read from the standard input.
 .SH "OPTIONS"
 .PP
 .IP "\fB-l, --list\fP" 10
-Lists all installed Software Collections on the system
+Lists all installed Software Collections on the system. If a collection name is specified
+then list of installed packages belonging to the collection is listed.
 .SH "EXAMPLES"
 .TP
 scl enable example 'less --version'
@@ -42,6 +43,12 @@ runs bash instance with foo and bar Software Collections enabled
 cat my_command | scl enable baz -
 run set of commands listed in my_command file in the environment with baz Software Collection
 enabled
+.TP
+scl -l
+list all installed collections
+.TP
+scl -l example
+list all packages within example collection
 .SH "AUTHOR"
 .PP
 \fBscl\fP was written by Jindrich Novy <jnovy@redhat.com>.
