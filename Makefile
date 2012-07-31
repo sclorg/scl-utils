@@ -5,7 +5,6 @@ CFLAGS?=-O2
 CFILES=scl.c
 OTHERFILES=Makefile scl_enabled macros.scl scl.1 scldeps.sh scl.attr
 SOURCES=$(CFILES) $(OTHERFILES)
-OBJECTS=scl.o
 
 BINDIR?=/usr/bin
 MANDIR?=/usr/share/man
@@ -14,8 +13,8 @@ CNFDIR?=/etc
 
 all: $(NAME)
 
-$(NAME): $(SOURCES) $(OBJECTS) $(OTHERFILES)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) $(WARNINGS) -o scl
+$(NAME): $(SOURCES) $(OTHERFILES)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(WARNINGS) $(CFILES) -o scl
 
 clean:
 	rm -f *.o scl

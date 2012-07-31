@@ -84,7 +84,7 @@ static char **read_script_output( char *ori_cmd ) {
 	struct stat sb;
 	char tmp[] = "/var/tmp/sclXXXXXX";
 	char *m, **lines, *mp, *cmd;
-	int i, lp = 0, ls, tfd;
+	int lp = 0, ls, tfd, i;
 	FILE *f;
 
 	tfd = mkstemp(tmp);
@@ -92,6 +92,11 @@ static char **read_script_output( char *ori_cmd ) {
 	i = system(cmd);
 	free(cmd);
 	free(ori_cmd);
+
+	if (WEXITSTATUS(i) != 0) {
+		fprintf(stderr, "Command execution failed: %s\n", ori_cmd);
+		exit(EXIT_FAILURE);
+	}
 
 	if (stat(tmp, &sb) == -1) {
 		fprintf(stderr, "%s does not exist\n", tmp);
@@ -136,7 +141,7 @@ static int list_packages_in_collection( const char *colname) {
 	struct dirent **nl;
 	int i, n, found;
         const char prefix[] = "/etc/scl/prefixes/";
-	char *cmd, *m, **lines;
+	char *cmd, **lines;
 	size_t cns;
 
 	if (stat(prefix, &sb) == -1) {
@@ -172,7 +177,7 @@ static int list_packages_in_collection( const char *colname) {
 	check_asprintf(&cmd, "rpm -qa --qf=\"%%{name}-%%{version}-%%{release}.%%{arch}\n%{sourcerpm}\n\"", colname);
 	lines = read_script_output(cmd);
 	if (!lines[0]) {
-		fprintf(stderr, "No package list from RPM received.\n", prefix);
+		fprintf(stderr, "No package list from RPM received.\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -199,8 +204,6 @@ int main(int argc, char **argv) {
 		if (argc == 2) {
 			list_collections();
 		} else {
-			int i;
-
 			for (i=2; i<argc; i++)
 				list_packages_in_collection(argv[i]);
 		}
