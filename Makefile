@@ -11,10 +11,10 @@ MANDIR?=/usr/share/man
 RPMCONFDIR?=/usr/lib/rpm
 CNFDIR?=/etc
 
-all: $(NAME)
+all: scl
 
-$(NAME): $(SOURCES) $(OTHERFILES)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(WARNINGS) $(CFILES) -o scl
+scl: $(SOURCES) $(OTHERFILES)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(WARNINGS) $(CFILES) -o $@
 
 clean:
 	rm -f *.o scl
@@ -22,7 +22,7 @@ clean:
 distclean: clean
 	rm -f *~
 
-dist: $(NAME)
+dist: all
 	LANG=C
 	rm -rf $(NAME)-$(VERSION)
 	mkdir $(NAME)-$(VERSION)
@@ -30,7 +30,7 @@ dist: $(NAME)
 	tar fcz $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
 	rm -rf $(NAME)-$(VERSION)
 
-install: $(NAME)
+install: all
 	mkdir -p $(DESTDIR)/$(BINDIR)
 	mkdir -p $(DESTDIR)/$(CNFDIR)/rpm
 	mkdir -p $(DESTDIR)/$(RPMCONFDIR)/fileattrs

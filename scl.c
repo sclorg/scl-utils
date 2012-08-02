@@ -139,9 +139,10 @@ static char **read_script_output( char *ori_cmd ) {
 static int list_packages_in_collection( const char *colname) {
 	struct stat sb;
 	struct dirent **nl;
-	int i, n, found;
+	int i, n, found, smax, ss;
         const char prefix[] = "/etc/scl/prefixes/";
 	char *cmd, **lines;
+	char **srpms = NULL;
 	size_t cns;
 
 	if (stat(prefix, &sb) == -1) {
@@ -174,7 +175,7 @@ static int list_packages_in_collection( const char *colname) {
 		fprintf(stderr, "warning: collection \"%s\" doesn't seem to be installed, checking anyway...\n", colname);
 	}
 
-	check_asprintf(&cmd, "rpm -qa --qf=\"%%{name}-%%{version}-%%{release}.%%{arch}\n%{sourcerpm}\n\"", colname);
+	check_asprintf(&cmd, "rpm -qa --qf=\"#%%{name}-%%{version}-%%{release}.%%{arch}\n%%{sourcerpm}\n[%%{provides}\n]\"", colname);
 	lines = read_script_output(cmd);
 	if (!lines[0]) {
 		fprintf(stderr, "No package list from RPM received.\n");
@@ -182,11 +183,43 @@ static int list_packages_in_collection( const char *colname) {
 	}
 
 	cns = strlen(colname);
-	for (i=1; lines[i-1] && lines[i]; i+=2) {
-		if (!strncmp(lines[i], colname, cns) && lines[i][cns] == '-') {
-			printf("%s\n", lines[i-1]);
+
+	for (smax=ss=i=0; lines[i];) {
+		char *srpm = lines[i+1];
+		i += 2;
+		for (;lines[i] && lines[i][0] != '#'; i++) {
+			if (!strncmp(lines[i], "scl-package(", 12) && !strncmp(&lines[i][12], colname, cns) && lines[i][12+cns] == ')') {
+				for (found=n=0; n<ss; n++) {
+					if (!strcmp(srpms[n], srpm)) {
+						found = 1;
+						break;
+					}
+				}
+				if (!found) {
+					if (ss == smax) {
+						smax += 0x100;
+						if (!(srpms=realloc(srpms, smax*sizeof(char*)))) {
+							fprintf(stderr, "Can't allocate memory.\n");
+							exit(EXIT_FAILURE);
+						}
+					}
+					srpms[ss++] = srpm;
+				}
+			}
 		}
 	}
+
+	for (i=0; lines[i]; i++) {
+		if (lines[i][0] == '#') {
+			for (n=0; n<ss; n++) {
+				if (!strcmp(lines[i+1], srpms[n])) {
+					printf("%s\n", &lines[i][1]);
+				}
+			}
+		}
+	}
+
+	free(srpms);
 	free(*lines);
 	free(lines);
 
@@ -200,7 +233,7 @@ int main(int argc, char **argv) {
 	char *cmd = NULL, *bash_cmd, *echo, *enabled;
 	int i, tfd, ffd, stdin_read = 0;
 
-	if (!strcmp(argv[argc-1],"--list") || !strcmp(argv[argc-1],"-l")) {
+	if (argc >= 2 && (!strcmp(argv[1],"--list") || !strcmp(argv[1],"-l"))) {
 		if (argc == 2) {
 			list_collections();
 		} else {
