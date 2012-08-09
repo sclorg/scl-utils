@@ -41,6 +41,7 @@
 %global _docdir			%{_datadir}/doc
 %global _defaultdocdir		%{_docdir}
 %global scl_pkg_name		%{scl}-%{pkg_name}
+%global __os_install_post	SCL_TMP=$RPM_BUILD_ROOT; RPM_BUILD_ROOT=$SCL_TMP%{_scl_root}; %{__os_install_post}RPM_BUILD_ROOT=$SCL_TMP
 BuildRequires: scl-utils-build
 }}
 
