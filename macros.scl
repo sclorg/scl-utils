@@ -41,7 +41,16 @@
 %global _docdir			%{_datadir}/doc
 %global _defaultdocdir		%{_docdir}
 %global scl_pkg_name		%{scl}-%{pkg_name}
-%global __os_install_post	SCL_TMP=$RPM_BUILD_ROOT; RPM_BUILD_ROOT=$SCL_TMP%{_scl_root}; %{__os_install_post}RPM_BUILD_ROOT=$SCL_TMP
+%global __os_install_post %{expand:
+    /usr/lib/rpm/brp-scl-compress %{_scl_root}
+    %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}
+    /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump}
+    }
+    /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip}
+    /usr/lib/rpm/brp-scl-python-bytecompile %{__python} %{?_python_bytecompile_errors_terminate_build} %{_scl_root}
+    /usr/lib/rpm/redhat/brp-python-hardlink
+    %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
+%{nil}}
 BuildRequires: scl-utils-build
 }}
 
