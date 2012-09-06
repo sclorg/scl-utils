@@ -50,6 +50,21 @@ static void write_script( int tfd, char *s ) {
 	}
 }
 
+static void print_usage( const char *name ) {
+	fprintf(stderr, "usage: %s <action> [<collection>...] <command>\n", name);
+	fprintf(stderr, "   or: %s -l|--list [<collection>...]\n", name);
+
+	fprintf(stderr, "\nOptions:\n"
+				 "    -l, --list            list installed Software Collections or packages\n"
+				 "                          that belong to them\n"
+				 "    -h, --help            display this help and exit\n"
+				 "\nActions:\n"
+				 "    enable                calls enable script from Software Collection\n"
+				 "                          (enables a Software Collection)\n"
+				 "    <SCL script name>     calls arbitrary script from a Software Collection\n"
+				 "\nUse '-' as <command> to read the command from standard input.\n");
+}
+
 static void list_collections() {
 	struct stat sb;
 	struct dirent **nl;
@@ -233,6 +248,11 @@ int main(int argc, char **argv) {
 	char *cmd = NULL, *bash_cmd, *echo, *enabled;
 	int i, tfd, ffd, stdin_read = 0;
 
+	if (argc == 2 && (!strcmp(argv[1],"--help") || !strcmp(argv[1],"-h"))) {
+		print_usage(argv[0]);
+		exit(EXIT_SUCCESS);
+	}
+
 	if (argc >= 2 && (!strcmp(argv[1],"--list") || !strcmp(argv[1],"-l"))) {
 		if (argc == 2) {
 			list_collections();
@@ -240,7 +260,7 @@ int main(int argc, char **argv) {
 			for (i=2; i<argc; i++)
 				list_packages_in_collection(argv[i]);
 		}
-		return EXIT_SUCCESS;
+		exit(EXIT_SUCCESS);
 	}
 
 	if (!strcmp(argv[argc-1], "-")) {	/* reading command from stdin */
@@ -275,8 +295,7 @@ int main(int argc, char **argv) {
 
 	if (!stdin_read) {
 		if (argc < 4) {
-			fprintf(stderr, "Usage: %s <action> [<collection1>, <collection2> ...] <command>\n"
-					"If <command> is '-' then the command will be read from standard input.\n", argv[0]);
+			print_usage(argv[0]);
 			exit(EXIT_FAILURE);
 		}
 		cmd = strdup(argv[argc-1]);
