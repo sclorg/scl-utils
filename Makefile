@@ -3,7 +3,7 @@ VERSION=`date +%Y%m%d`
 WARNINGS?=-Wall -Wshadow -Wcast-align -Winline -Wextra -Wmissing-noreturn
 CFLAGS?=-O2
 CFILES=scl.c
-OTHERFILES=Makefile scl_enabled macros.scl scl.1 scldeps.sh scl.attr brp-scl-compress brp-scl-python-bytecompile
+OTHERFILES=Makefile scl_enabled macros.scl scl.1 scldeps.sh scl.attr brp-scl-compress brp-scl-python-bytecompile scl.bash
 SOURCES=$(CFILES) $(OTHERFILES)
 
 BINDIR?=/usr/bin
@@ -33,6 +33,7 @@ dist: all
 install: all
 	mkdir -p $(DESTDIR)/$(BINDIR)
 	mkdir -p $(DESTDIR)/$(CNFDIR)/rpm
+	mkdir -p $(DESTDIR)/$(CNFDIR)/bash_completion.d
 	mkdir -p $(DESTDIR)/$(RPMCONFDIR)/fileattrs
 	cp macros.scl $(DESTDIR)/$(CNFDIR)/rpm
 	cp scl $(DESTDIR)/$(BINDIR)
@@ -42,6 +43,7 @@ install: all
 	cp scldeps.sh $(DESTDIR)/$(RPMCONFDIR)
 	cp brp-scl-compress $(DESTDIR)/$(RPMCONFDIR)
 	cp brp-scl-python-bytecompile $(DESTDIR)/$(RPMCONFDIR)
+	cp scl.bash $(DESTDIR)/$(CNFDIR)/bash_completion.d
 
 uninstall:
 	rm -f $(BINDIR)/scl $(BINDIR)/scl_enabled
@@ -51,3 +53,4 @@ uninstall:
 	rm -f $(RPMCONFDIR)/scldeps.sh
 	rm -f $(RPMCONFDIR)/brp-scl-compress
 	rm -f $(RPMCONFDIR)/brp-scl-python-bytecompile
+	rm -f $(CNFDIR)/bash_completion.d/scl.bash
