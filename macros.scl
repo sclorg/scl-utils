@@ -51,6 +51,22 @@
     /usr/lib/rpm/redhat/brp-python-hardlink
     %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
 %{nil}}
+%global debug_package %{expand:
+%ifnarch noarch
+%global __debug_package 1
+%package debuginfo
+Summary: Debug information for package %{name}
+Group: Development/Debug
+AutoReqProv: 0
+Provides: scl-package(%scl)
+%description debuginfo
+This package provides debug information for package %{name}.
+Debug information is useful when developing applications that use this
+package or when debugging this package.
+%files debuginfo -f debugfiles.list
+%defattr(-,root,root)
+%endif
+%{nil}}
 BuildRequires: scl-utils-build
 }}
 
