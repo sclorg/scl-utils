@@ -303,12 +303,17 @@ int main(int argc, char **argv) {
 
 	tfd = mkstemp(tmp);
 
-	check_asprintf(&enabled, "scl_enabled %s\nif [ $? != 0 ]; then\n"
-				 "  eval \"SCLS=( ${x_scls[*]} )\"\n"
-				 "  SCLS+=(%s)\n"
-				 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[2], argv[2]);
+	check_asprintf(&enabled, "eval \"SCLS=( ${x_scls[*]} )\"\n");
 	write_script(tfd, enabled);
 	free(enabled);
+
+	for (i=2; i<argc-1; ++i) {
+		check_asprintf(&enabled, "scl_enabled %s\nif [ $? != 0 ]; then\n"
+					 "  SCLS+=(%s)\n"
+					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[i], argv[i]);
+		write_script(tfd, enabled);
+		free(enabled);
+	}
 
 	for (i=2; i<argc-1; i++) {
 		FILE *f;
