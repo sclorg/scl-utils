@@ -307,19 +307,16 @@ int main(int argc, char **argv) {
 	write_script(tfd, enabled);
 	free(enabled);
 
-	for (i=2; i<argc-1; ++i) {
-		check_asprintf(&enabled, "scl_enabled %s\nif [ $? != 0 ]; then\n"
-					 "  SCLS+=(%s)\n"
-					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[i], argv[i]);
-		write_script(tfd, enabled);
-		free(enabled);
-	}
-
 	for (i=2; i<argc-1; i++) {
 		FILE *f;
 		size_t r;
 		char scl_dir[BUFSIZ];
 
+		check_asprintf(&enabled, "scl_enabled %s\nif [ $? != 0 ]; then\n"
+					 "  SCLS+=(%s)\n"
+					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[i], argv[i]);
+		write_script(tfd, enabled);
+		free(enabled);
 		check_asprintf(&path, "/etc/scl/prefixes/%s", argv[i]);
 		if (!(f=fopen(path,"r"))) {
 			fprintf(stderr, "Unable to open %s!\n", path);
