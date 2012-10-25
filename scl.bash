@@ -17,8 +17,14 @@ _scl()
   # handle scriptlets; the first parameter must be a scriptlet if it is not an option
   if ((COMP_CWORD == 1)); then
     # get array of scriptlets found throughout collections
-    local scriptlets=($(find /opt/rh/* -maxdepth 1 -type f -exec basename {} \; | sort -u))
-    COMPREPLY=( $(compgen -W "${scriptlets[*]}" -- ${cur}) )
+    local collections=($(find /etc/scl/prefixes -maxdepth 1 -mindepth 1 -type f -exec basename {} \; | sort -u))
+    local scriptlets=()
+    for col in ${collections[@]}; do
+        local prefix=`cat /etc/scl/prefixes/$col`
+        scriptlets+=($(find $prefix/$col/* -maxdepth 1 -type f -exec basename {} \; | sort -u))
+    done
+    scriptlets_str=`echo ${scriptlets[@]} | sed 's/ /\n/g'| sort -u`
+    COMPREPLY=( $(compgen -W "$scriptlets_str" -- ${cur}) )
     return 0
   fi
 
