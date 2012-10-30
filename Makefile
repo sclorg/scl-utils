@@ -3,7 +3,7 @@ VERSION=`date +%Y%m%d`
 WARNINGS?=-Wall -Wshadow -Wcast-align -Winline -Wextra -Wmissing-noreturn
 CFLAGS?=-O2
 CFILES=scl.c
-OTHERFILES=Makefile scl_enabled macros.scl scl.1 scldeps.sh scl.attr brp-scl-compress brp-scl-python-bytecompile scl.bash
+OTHERFILES=Makefile scl_enabled macros.scl scl.1 scldeps.sh scl.attr brp-scl-compress brp-scl-python-bytecompile scl.bash sclbuild
 SOURCES=$(CFILES) $(OTHERFILES)
 
 BINDIR?=/usr/bin
@@ -37,6 +37,7 @@ install: all
 	mkdir -p $(DESTDIR)/$(RPMCONFDIR)/fileattrs
 	cp macros.scl $(DESTDIR)/$(CNFDIR)/rpm
 	cp scl $(DESTDIR)/$(BINDIR)
+	cp sclbuild $(DESTDIR)/$(BINDIR)
 	cp scl_enabled $(DESTDIR)/$(BINDIR)
 	cp scl.1 $(DESTDIR)/$(MANDIR)/man1
 	cp scl.attr $(DESTDIR)/$(RPMCONFDIR)/fileattrs
@@ -46,7 +47,7 @@ install: all
 	cp scl.bash $(DESTDIR)/$(CNFDIR)/bash_completion.d
 
 uninstall:
-	rm -f $(BINDIR)/scl $(BINDIR)/scl_enabled
+	rm -f $(BINDIR)/scl $(BINDIR)/scl_enabled $(BINDIR)/sclbuild
 	rm -f $(CNFDIR)/rpm/macros.scl
 	rm -f $(MANDIR)/man1/scl.1
 	rm -f $(RPMCONFDIR)/fileattrs/scl.attr
