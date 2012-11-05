@@ -3,9 +3,9 @@
 scl \- Setup and run software from Software Collection environment
 .SH "SYNOPSIS"
 .PP
-\fBscl\fP \fI<action>\fR [\fI<collection1> <collection2> ...\fR] \fI<command>\fR
+\fBscl\fP \fI<action>\fR \fI<collection1>\fR [\fI<collection2> ...\fR] \fI<command>\fR
 .PP
-\fBscl\fP {\fB-l|--list\fP}
+\fBscl\fP {\fB-l|--list\fP} [\fI<collection1> <collection2> ...\fR]
 .SH "DESCRIPTION"
 .PP
 This manual page documents \fBscl\fP, a
@@ -29,9 +29,10 @@ environment as soon as the command finishes. It \fI<command>\fR is '-' (dash) th
 read from the standard input.
 .SH "OPTIONS"
 .PP
-.IP "\fB-l, --list\fP" 10
-Lists all installed Software Collections on the system. If a collection name is specified
-then list of installed packages belonging to the collection is listed.
+.IP "\fB-l, --list\fP"
+Lists all installed Software Collections on the system.
+.IP "\fB-l, --list\fP \fI<collection1> <collection2> ...\fR"
+If a collection name is specified then list of installed packages belonging to the collection is listed.
 .SH "EXAMPLES"
 .TP
 scl enable example 'less --version'
