@@ -30,6 +30,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#define SCL_CONF_DIR "/etc/scl/conf/"
+
 static void check_asprintf( char **strp, const char *fmt, ... ) {
 	va_list args;
 
@@ -69,19 +71,18 @@ static void list_collections() {
 	struct stat sb;
 	struct dirent **nl;
 	int n, i;
-        const char prefix[] = "/etc/scl/prefixes/";
 
-	if (stat(prefix, &sb) == -1) {
-		fprintf(stderr, "%s does not exist\n", prefix);
+	if (stat(SCL_CONF_DIR, &sb) == -1) {
+		fprintf(stderr, "%s does not exist\n", SCL_CONF_DIR);
 		exit(EXIT_FAILURE);
 	}
 
 	if (!S_ISDIR(sb.st_mode)) {
-		fprintf(stderr, "%s is not a directory\n", prefix);
+		fprintf(stderr, "%s is not a directory\n", SCL_CONF_DIR);
 		exit(EXIT_FAILURE);
 	}
 
-	if ((n = scandir(prefix, &nl, 0, alphasort)) < 0) {
+	if ((n = scandir(SCL_CONF_DIR, &nl, 0, alphasort)) < 0) {
 		perror("scandir");
 		exit(EXIT_FAILURE);
 	}
@@ -155,22 +156,21 @@ static int list_packages_in_collection( const char *colname) {
 	struct stat sb;
 	struct dirent **nl;
 	int i, n, found, smax, ss;
-        const char prefix[] = "/etc/scl/prefixes/";
 	char *cmd, **lines;
 	char **srpms = NULL;
 	size_t cns;
 
-	if (stat(prefix, &sb) == -1) {
-		fprintf(stderr, "%s does not exist\n", prefix);
+	if (stat(SCL_CONF_DIR, &sb) == -1) {
+		fprintf(stderr, "%s does not exist\n", SCL_CONF_DIR);
 		exit(EXIT_FAILURE);
 	}
 
 	if (!S_ISDIR(sb.st_mode)) {
-		fprintf(stderr, "%s is not a directory\n", prefix);
+		fprintf(stderr, "%s is not a directory\n", SCL_CONF_DIR);
 		exit(EXIT_FAILURE);
 	}
 
-	if ((n = scandir(prefix, &nl, 0, alphasort)) < 0) {
+	if ((n = scandir(SCL_CONF_DIR, &nl, 0, alphasort)) < 0) {
 		perror("scandir");
 		exit(EXIT_FAILURE);
 	}
@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
 					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[i], argv[i]);
 		write_script(tfd, enabled);
 		free(enabled);
-		check_asprintf(&path, "/etc/scl/prefixes/%s", argv[i]);
+		check_asprintf(&path, SCL_CONF_DIR "%s", argv[i]);
 		if (!(f=fopen(path,"r"))) {
 			fprintf(stderr, "Unable to open %s!\n", path);
 			unlink(tmp);
