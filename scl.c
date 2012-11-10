@@ -96,7 +96,7 @@ static void list_collections() {
 	free(nl);
 }
 
-static int make_script_temp( char *tmp) {
+static int make_script_temp( char *tmp ) {
 	int r;
 	mode_t old_mode = umask(S_IXUSR | S_IRWXG | S_IRWXO);
 
@@ -118,12 +118,12 @@ static char **read_script_output( char *ori_cmd ) {
 	check_asprintf(&cmd, "%s > %s", ori_cmd, tmp);
 	i = system(cmd);
 	free(cmd);
-	free(ori_cmd);
 
 	if (WEXITSTATUS(i) != 0) {
 		fprintf(stderr, "Command execution failed: %s\n", ori_cmd);
 		exit(EXIT_FAILURE);
 	}
+	free(ori_cmd);
 
 	if (stat(tmp, &sb) == -1) {
 		fprintf(stderr, "%s does not exist\n", tmp);
