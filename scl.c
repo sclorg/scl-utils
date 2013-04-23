@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
 
 	tfd = make_script_temp(tmp);
 
-	check_asprintf(&enabled, "eval \"SCLS=( ${x_scls[*]} )\"\n");
+	check_asprintf(&enabled, "eval \"SCLS=( ${X_SCLS[*]} )\"\n");
 	write_script(tfd, enabled);
 	free(enabled);
 
