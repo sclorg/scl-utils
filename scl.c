@@ -96,17 +96,6 @@ static void list_collections() {
 	free(nl);
 }
 
-static int make_script_temp( char *tmp ) {
-	int r;
-	mode_t old_mode = umask(S_IXUSR | S_IRWXG | S_IRWXO);
-
-	r = mkstemp(tmp);
-
-	umask(old_mode);
-
-	return r;
-}
-
 static char **read_script_output( char *ori_cmd ) {
 	struct stat sb;
 	char tmp[] = "/var/tmp/sclXXXXXX";
@@ -114,7 +103,7 @@ static char **read_script_output( char *ori_cmd ) {
 	int lp = 0, ls, tfd, i;
 	FILE *f;
 
-	tfd = make_script_temp(tmp);
+	tfd = mkstemp(tmp);
 	check_asprintf(&cmd, "%s > %s", ori_cmd, tmp);
 	i = system(cmd);
 	free(cmd);
@@ -312,7 +301,7 @@ int main(int argc, char **argv) {
 		cmd = strdup(argv[argc-1]);
 	}
 
-	tfd = make_script_temp(tmp);
+	tfd = mkstemp(tmp);
 
 	check_asprintf(&enabled, "eval \"SCLS=( ${X_SCLS[*]} )\"\n");
 	write_script(tfd, enabled);
