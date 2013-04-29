@@ -201,7 +201,7 @@ static int list_packages_in_collection( const char *colname) {
 		fprintf(stderr, "warning: collection \"%s\" doesn't seem to be installed, checking anyway...\n", colname);
 	}
 
-	check_asprintf(&cmd, "rpm -qa --qf=\"#%%{name}-%%{version}-%%{release}.%%{arch}\n%%{sourcerpm}\n[%%{provides}\n]\"", colname);
+	check_asprintf(&cmd, "rpm -qa --qf=\"#%%{name}-%%{version}-%%{release}.%%{arch}\n%%{sourcerpm}\n[%%{provides}\n]\"");
 	lines = read_script_output(cmd);
 	if (!lines[0]) {
 		fprintf(stderr, "No package list from RPM received.\n");
