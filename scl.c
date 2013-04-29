@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
 		size_t r;
 		char scl_dir[BUFSIZ];
 
-		check_asprintf(&enabled, "scl_enabled %s\nif [ $? != 0 ]; then\n"
+		check_asprintf(&enabled, "/usr/bin/scl_enabled %s\nif [ $? != 0 ]; then\n"
 					 "  SCLS+=(%s)\n"
 					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[i], argv[i]);
 		write_script(tfd, enabled);
