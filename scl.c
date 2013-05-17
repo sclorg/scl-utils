@@ -314,7 +314,7 @@ int main(int argc, char **argv) {
 
 		check_asprintf(&enabled, "/usr/bin/scl_enabled %s\nif [ $? != 0 ]; then\n"
 					 "  SCLS+=(%s)\n"
-					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\nfi\n", argv[i], argv[i]);
+					 "  export X_SCLS=$(printf '%%q ' \"${SCLS[@]}\")\n", argv[i], argv[i]);
 		write_script(tfd, enabled);
 		free(enabled);
 		check_asprintf(&path, SCL_CONF_DIR "%s", argv[i]);
@@ -359,6 +359,7 @@ int main(int argc, char **argv) {
 			unlink(tmp);
 			exit(EXIT_FAILURE);
 		}
+		write_script(tfd, "fi\n");
 
 		close(ffd);
 		free(echo);
