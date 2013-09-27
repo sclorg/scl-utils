@@ -68,6 +68,7 @@ package or when debugging this package.
 %endif
 %{nil}}
 BuildRequires: scl-utils-build
+Provides: scl-package(%scl)
 }
 %{?scl_package_override:%scl_package_override}
 }
