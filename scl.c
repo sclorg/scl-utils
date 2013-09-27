@@ -245,8 +245,10 @@ int main(int argc, char **argv) {
 	struct stat st;
 	char *path, *enablepath;
 	char tmp[] = "/var/tmp/sclXXXXXX";
-	char *cmd = NULL, *bash_cmd, *echo, *enabled;
-	int i, tfd, ffd, stdin_read = 0;
+	char *bash_cmd, *echo, *enabled;
+	int i, tfd, ffd;
+	int separator_pos = 0;
+	char *command = NULL;
 
 	if (argc == 2 && (!strcmp(argv[1],"--help") || !strcmp(argv[1],"-h"))) {
 		print_usage(argv[0]);
@@ -263,25 +265,48 @@ int main(int argc, char **argv) {
 		exit(EXIT_SUCCESS);
 	}
 
-	if (!strcmp(argv[argc-1], "-")) {	/* reading command from stdin */
-		size_t r;
+	for (i = 0; i < argc; i++) {
+		if (strcmp(argv[i], "--") == 0) {
+			break;
+		}
+	}
+	separator_pos = i;
 
+	if (separator_pos == argc) {
+		/* Separator not found */
 		if (argc < 4) {
-			fprintf(stderr, "Need at least 3 arguments.\nRun %s without arguments to get help.\n", argv[0]);
+			fprintf(stderr, "Need at least 3 arguments.\nRun %s --help to get help.\n", argv[0]);
 			exit(EXIT_FAILURE);
 		}
 
-		cmd = malloc(BUFSIZ);
+		command = strdup(argv[argc-1]);
+		if (command == NULL) {
+			fprintf(stderr, "Can't duplicate string.\n");
+		}
+	} else if (separator_pos == argc-1) {
+		command = "-";
+	} else if (separator_pos <= 2) {
+		fprintf(stderr, "Need at least 2 arguments before command is specified.\nRun %s --help to get help.\n", argv[0]);
+		exit(EXIT_FAILURE);
+	} else {
+		command = NULL;
+	}
 
-		if (!cmd) {
+	if ((command == NULL && !strcmp(argv[separator_pos+1], "-")) ||
+	    (command != NULL && !strcmp(command, "-"))) {	/* reading command from stdin */
+		size_t r;
+
+
+		command = malloc(BUFSIZ);
+		if (!command) {
 			fprintf(stderr, "Can't allocate memory.\n");
 			exit(EXIT_FAILURE);
 		}
 
-		for (r=0; (r += fread(cmd+r, 1, BUFSIZ, stdin));) {
+		for (r=0; (r += fread(command+r, 1, BUFSIZ, stdin));) {
 			if (feof(stdin)) break;
-			cmd = realloc(cmd, r+BUFSIZ);
-			if (!cmd) {
+			command = realloc(command, r+BUFSIZ);
+			if (!command) {
 				fprintf(stderr, "Can't reallocate memory.\n");
 				exit(EXIT_FAILURE);
 			}
@@ -290,15 +315,25 @@ int main(int argc, char **argv) {
 			fprintf(stderr, "Error reading command from stdin.\n");
 			exit(EXIT_FAILURE);
 		}
-		stdin_read = 1;
-	}
+	} else if (command == NULL) {
+		int len = 0;
+		for (i = separator_pos+1; i < argc; i++) {
+			len += strlen(argv[i])+1; /* +1 for additional space */
+		}
 
-	if (!stdin_read) {
-		if (argc < 4) {
-			print_usage(argv[0]);
+		command = malloc(len*sizeof(char));
+		if (command == NULL) {
+			fprintf(stderr, "Can't allocate memory.\n");
 			exit(EXIT_FAILURE);
 		}
-		cmd = strdup(argv[argc-1]);
+
+		len = 0;
+		for (i = separator_pos+1; i < argc; i++) {
+			strcpy(command+len, argv[i]);
+			len += strlen(argv[i]);
+			command[len] = ' ';
+			len++;
+		}
 	}
 
 	tfd = mkstemp(tmp);
@@ -367,9 +402,9 @@ int main(int argc, char **argv) {
 		free(path);
 	}
 
-	write_script(tfd, cmd);
+	write_script(tfd, command);
 	write_script(tfd, "\n");
-	free(cmd);
+	free(command);
 	close(tfd);
 
 	check_asprintf(&bash_cmd, "/bin/bash %s", tmp);
