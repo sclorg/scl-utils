@@ -5,6 +5,8 @@ scl \- Setup and run software from Software Collection environment
 .PP
 \fBscl\fP \fI<action>\fR \fI<collection1>\fR [\fI<collection2> ...\fR] \fI<command>\fR
 .PP
+\fBscl\fP \fI<action>\fR \fI<collection1>\fR [\fI<collection2> ...\fR] -- \fI<command>\fR
+.PP
 \fBscl\fP {\fB-l|--list\fP} [\fI<collection1> <collection2> ...\fR]
 .SH "DESCRIPTION"
 .PP
@@ -27,6 +29,10 @@ collections which are enabled by the left-right order as present on \fBscl\fP co
 Collection environment enabled. Control is returned back to the caller with the original
 environment as soon as the command finishes. If \fI<command>\fR is '-' (dash) then it is
 read from the standard input.
+.PP
+Note that if you use \fI<command>\fR consisting of multiple arguments, you either need to
+use quotes or the \fB--\fP command separator. Everything that follows the
+separator will be considered a command or its argument.
 .SH "OPTIONS"
 .PP
 .IP "\fB-l, --list\fP"
@@ -51,15 +57,19 @@ list all installed collections
 scl -l example
 list all packages within example collection
 .TP
-A wrapper script must use proper quoting like in the following example
+A wrapper script must use proper quoting or command separator like in the
+following examples
 .PP
 .nf
 .RS
 #!/bin/bash
 COMMAND="ruby $(printf "%q " "$@")"
 scl enable ruby193 "$COMMAND"
+# or
+scl enable ruby193 -- $COMMAND
 .RE
 .fi
 .SH "AUTHOR"
 .PP
-\fBscl\fP was written by Jindrich Novy <jnovy@redhat.com>.
+\fBscl\fP was written by Jindrich Novy <jnovy@redhat.com> and Jan Zeleny
+<jzeleny@redhat.com>.
