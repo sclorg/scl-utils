@@ -3,7 +3,7 @@ VERSION=`date +%Y%m%d`
 WARNINGS?=-Wall -Wshadow -Wcast-align -Winline -Wextra -Wmissing-noreturn
 CFLAGS?=-O2
 CFILES=scl.c
-OTHERFILES=Makefile scl_enabled macros.scl scl.1 scldeps.sh scl.attr brp-scl-compress brp-scl-python-bytecompile scl.bash sclbuild
+OTHERFILES=Makefile LICENSE scl_enabled macros.scl scl.1 scldeps.sh scl.attr brp-scl-compress brp-scl-python-bytecompile scl.bash sclbuild
 SOURCES=$(CFILES) $(OTHERFILES)
 
 BINDIR?=/usr/bin
