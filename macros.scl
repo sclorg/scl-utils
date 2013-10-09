@@ -32,7 +32,7 @@
 %global _libexecdir		%{_exec_prefix}/libexec
 %global _datadir		%{_prefix}/share
 %global _sysconfdir		%{_scl_root}/etc
-%global _sharedstatedir		%{_prefix}/com
+%global _sharedstatedir		%{_scl_root}/var/lib
 %global _localstatedir		%{_scl_root}/var
 %global _libdir			%{_exec_prefix}/%{_lib}
 %global _includedir		%{_prefix}/include
