@@ -18,7 +18,7 @@
 %global _root_libexecdir	%{_exec_prefix}/libexec
 %global _root_datadir		%{_prefix}/share
 %global _root_sysconfdir	%{_sysconfdir}
-%global _root_sharedstatedir	%{_prefix}/com
+%global _root_sharedstatedir	/var/lib
 %global _root_localstatedir	%{_localstatedir}
 %global _root_libdir		%{_exec_prefix}/%{_lib}
 %global _root_includedir	%{_prefix}/include
