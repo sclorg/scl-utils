@@ -69,7 +69,7 @@ package or when debugging this package.
 %{nil}}
 BuildRequires: scl-utils-build
 Provides: scl-package(%scl)
-%global __provides_exclude_from ^(%{_libdir}/*.so.*)$
+%global __provides_exclude_from ^%{_libdir}/.*.so.*$
 }
 %{?scl_package_override:%scl_package_override}
 }
