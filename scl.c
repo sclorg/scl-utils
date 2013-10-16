@@ -31,6 +31,7 @@
 #include <fcntl.h>
 
 #define SCL_CONF_DIR "/etc/scl/conf/"
+#define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 
 static void check_asprintf( char **strp, const char *fmt, ... ) {
 	va_list args;
@@ -342,7 +343,7 @@ int main(int argc, char **argv) {
 	write_script(tfd, enabled);
 	free(enabled);
 
-	for (i=2; i<argc-1; i++) {
+	for (i=2; i<MIN(separator_pos, argc-1); i++) {
 		FILE *f;
 		size_t r;
 		char scl_dir[BUFSIZ];
