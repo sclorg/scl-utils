@@ -13,11 +13,13 @@ if [ $# -eq 0 -o $1 = "-h" -o $1 = "--help" ]; then
 fi
 
 
+if [ -z "$_recursion" ]; then
+    _recursion="false"
+fi
 if [ -z "$_scl_scriptlet_name" ]; then
     # The only allowed action in the case of recursion is the same
     # as was the original
     _scl_scriptlet_name=$1
-    _recursion="false"
 fi
 shift 1
 
@@ -66,4 +68,8 @@ if [ $_recursion == "false" ]; then
         fi;
         _i=$(($_i+1))
     done
+    _scls=()
+    _scl_prefixes=()
+    _scl_scriptlet_name=""
+    _recursion="false"
 fi
