@@ -298,15 +298,25 @@ int main(int argc, char **argv) {
 		size_t r;
 
 
-		command = malloc(BUFSIZ);
+		command = malloc(BUFSIZ+1);
 		if (!command) {
 			fprintf(stderr, "Can't allocate memory.\n");
 			exit(EXIT_FAILURE);
 		}
 
 		for (r=0; (r += fread(command+r, 1, BUFSIZ, stdin));) {
-			if (feof(stdin)) break;
-			command = realloc(command, r+BUFSIZ);
+			if (feof(stdin)) {
+				if (r % BUFSIZ == 0) {
+					command = realloc(command, r+1);
+					if (!command) {
+						fprintf(stderr, "Can't reallocate memory.\n");
+						exit(EXIT_FAILURE);
+					}
+				}
+				command[r] = '\0';
+				break;
+			}
+			command = realloc(command, r+BUFSIZ+1);
 			if (!command) {
 				fprintf(stderr, "Can't reallocate memory.\n");
 				exit(EXIT_FAILURE);
