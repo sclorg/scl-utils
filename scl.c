@@ -319,10 +319,10 @@ int main(int argc, char **argv) {
 	} else if (command == NULL) {
 		int len = 0;
 		for (i = separator_pos+1; i < argc; i++) {
-			len += strlen(argv[i])+1; /* +1 for additional space */
+			len += strlen(argv[i])+3; /* +1 for additional space, +2 for additional quotes */
 		}
 
-		command = malloc(len*sizeof(char));
+		command = malloc((len+1)*sizeof(char));
 		if (command == NULL) {
 			fprintf(stderr, "Can't allocate memory.\n");
 			exit(EXIT_FAILURE);
@@ -330,11 +330,13 @@ int main(int argc, char **argv) {
 
 		len = 0;
 		for (i = separator_pos+1; i < argc; i++) {
+			command[len++] = '"';
 			strcpy(command+len, argv[i]);
 			len += strlen(argv[i]);
-			command[len] = ' ';
-			len++;
+			command[len++] = '"';
+			command[len++] = ' ';
 		}
+		command[len] = '\0';
 	}
 
 	tfd = mkstemp(tmp);
