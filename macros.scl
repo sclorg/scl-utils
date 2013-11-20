@@ -8,9 +8,7 @@
 %global scl_name		%{scl}
 %global scl_prefix		%{scl}-
 %global scl_runtime		%{scl}-runtime
-%global scl_basedir		/opt
-%{!?scl_vendor:			%global scl_vendor rh}
-%{!?_scl_prefix:		%global _scl_prefix %{scl_basedir}/%{scl_vendor}}
+%{!?_scl_prefix:		%global _scl_prefix /opt/rh}
 %global _scl_scripts		%{_scl_prefix}/%{scl}
 %global _scl_root		%{_scl_prefix}/%{scl}/root
 %global _root_prefix		%{_prefix}
