@@ -30,9 +30,15 @@ Collection environment enabled. Control is returned back to the caller with the 
 environment as soon as the command finishes. If \fI<command>\fR is '-' (dash) then it is
 read from the standard input.
 .PP
-Note that if you use \fI<command>\fR consisting of multiple arguments, you either need to
+Note: if you use \fI<command>\fR consisting of multiple arguments, you either need to
 use quotes or the \fB--\fP command separator. Everything that follows the
 separator will be considered a command or its argument.
+.PP
+Note: some commands modify user environment in some way. Those commands may
+potentially break SCLs, as their activation also usually depends on env.
+modification as well. Typical examples of such commands are \fBsu\fP and
+\fBsudo\fP. Every collection modifies the environment differently, thus more
+details may be found in the documentation of the particular collection.
 .SH "OPTIONS"
 .PP
 .IP "\fB-l, --list\fP"
