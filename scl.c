@@ -105,6 +105,10 @@ static char **read_script_output( char *ori_cmd ) {
 	FILE *f;
 
 	tfd = mkstemp(tmp);
+	if (tfd < 0) {
+		fprintf(stderr, "Cannot create a temporary file: %s\n", tmp);
+		exit(EXIT_FAILURE);
+	}
 	check_asprintf(&cmd, "%s > %s", ori_cmd, tmp);
 	i = system(cmd);
 	free(cmd);
@@ -350,6 +354,10 @@ int main(int argc, char **argv) {
 	}
 
 	tfd = mkstemp(tmp);
+	if (tfd < 0) {
+		fprintf(stderr, "Cannot create a temporary file: %s\n", tmp);
+		exit(EXIT_FAILURE);
+	}
 
 	check_asprintf(&enabled, "eval \"SCLS=( ${X_SCLS[*]} )\"\n");
 	write_script(tfd, enabled);
