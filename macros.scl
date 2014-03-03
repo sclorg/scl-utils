@@ -73,6 +73,7 @@ package or when debugging this package.
 Requires: %scl_runtime
 }
 BuildRequires: scl-utils-build
+Provides: scl-package(%scl)
 %{?scl_package_override:%scl_package_override}
 }
 
