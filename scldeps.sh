@@ -9,5 +9,8 @@ case $1 in
 -P|--provides)
     echo -n "scl-package($2)"
     ;;
+-R|--requires)
+    echo -n "$2"
+    ;;
 esac
 exit 0

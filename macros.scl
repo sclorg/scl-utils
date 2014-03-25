@@ -79,4 +79,3 @@ Provides: scl-package(%scl)
 
 %scl_require()	%{_scl_prefix}/%1/enable, %1
 %scl_require_package() %1-%2
-
