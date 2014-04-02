@@ -70,10 +70,12 @@ package or when debugging this package.
 %defattr(-,root,root)
 %endif
 %{nil}}
-Requires: %scl_runtime
 }
 BuildRequires: scl-utils-build
+%if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
 Provides: scl-package(%scl)
+Requires: %scl_runtime
+%endif
 %{?scl_package_override:%scl_package_override}
 }
 
