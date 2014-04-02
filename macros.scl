@@ -3,6 +3,39 @@
 # Copyright (C) 2012 Red Hat, Inc.
 #   Written by Jindrich Novy <jnovy@redhat.com>.
 
+%scl_debug() %{expand:
+%define old_debug %{lua:print(rpm.expand("%{debug_package}"):len())}
+%global debug_package %{expand:
+%if "%{?old_debug}" == "0"
+       %{expand: %{nil}}
+%else
+%if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
+        %{expand: %{nil}}
+%else
+%ifnarch noarch
+%package debuginfo
+Summary: Debug information for package %{name}
+Group: Development/Debug
+AutoReqProv: 0
+Requires: %scl_runtime
+Provides: scl-package(%scl)
+%{lua:
+        debuginfo=tonumber(rpm.expand("%{old_debug}"))
+        if debuginfo > 0 then
+                rpm.define("__debug_package 1")
+        end
+}
+%description debuginfo
+This package provides debug information for package %{name}.
+Debug information is useful when developing applications that use this
+package or when debugging this package.
+%files debuginfo -f debugfiles.list
+%defattr(-,root,root)
+%endif
+%endif
+%endif
+%{nil}}}
+
 %scl_package() %{expand:%{!?_root_prefix:
 %global pkg_name		%1
 %global scl_name		%{scl}
@@ -43,6 +76,7 @@
 %global _docdir			%{_datadir}/doc
 %global _defaultdocdir		%{_docdir}
 %global scl_pkg_name		%{scl}-%{pkg_name}
+%scl_debug
 %global __os_install_post %{expand:
     /usr/lib/rpm/brp-scl-compress %{_scl_root}
     %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}
@@ -52,23 +86,6 @@
     /usr/lib/rpm/brp-scl-python-bytecompile %{__python} %{?_python_bytecompile_errors_terminate_build} %{_scl_root}
     /usr/lib/rpm/redhat/brp-python-hardlink
     %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
-%{nil}}
-%global debug_package %{expand:
-%ifnarch noarch
-%global __debug_package 1
-%package debuginfo
-Summary: Debug information for package %{name}
-Group: Development/Debug
-AutoReqProv: 0
-Requires: %scl_runtime
-Provides: scl-package(%scl)
-%description debuginfo
-This package provides debug information for package %{name}.
-Debug information is useful when developing applications that use this
-package or when debugging this package.
-%files debuginfo -f debugfiles.list
-%defattr(-,root,root)
-%endif
 %{nil}}
 }
 BuildRequires: scl-utils-build
@@ -81,3 +98,4 @@ Requires: %scl_runtime
 
 %scl_require()	%{_scl_prefix}/%1/enable, %1
 %scl_require_package() %1-%2
+
