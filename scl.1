@@ -25,9 +25,10 @@ to update search paths, etc.
 One can enable more Software Collections if needed and therefore one can use multiple
 collections which are enabled by the left-right order as present on \fBscl\fP command-line.
 .PP
-\fI<command>\fR is an arbitrary command or set of commands to execute within the Software
-Collection environment enabled. Control is returned back to the caller with the original
-environment as soon as the command finishes. If \fI<command>\fR is '-' (dash) then it is
+\fI<command>\fR marks specified Software Collections as enabled. Executes the script,
+which is expected to set proper environment. Executes the \fI<command>\fR.
+Control is returned back to the caller with the original environment as soon
+as the command finishes. If \fI<command>\fR is '-' (dash) then it is
 read from the standard input.
 .PP
 Note: if you use \fI<command>\fR consisting of multiple arguments, you either need to
