@@ -36,10 +36,11 @@ package or when debugging this package.
 %endif
 %{nil}}}
 
+%scl_prefix()   %{?scl:%(if [ "%1" = "%%1" ]; then echo "%{scl}-"; else echo "%1-"; fi)}%{!?scl:%{nil}}
+
 %scl_package() %{expand:%{!?_root_prefix:
 %global pkg_name		%1
 %global scl_name		%{scl}
-%global scl_prefix		%{scl}-
 %global scl_runtime		%{scl}-runtime
 %{!?scl_basedir:		%global scl_basedir /opt}
 %{!?scl_vendor:			%global scl_vendor rh}
