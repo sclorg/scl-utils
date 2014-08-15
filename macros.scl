@@ -76,6 +76,7 @@ package or when debugging this package.
 %global _mandir			%{_datadir}/man
 %global _docdir			%{_datadir}/doc
 %global _defaultdocdir		%{_docdir}
+}
 %global scl_pkg_name		%{scl}-%{pkg_name}
 %scl_debug
 %global __os_install_post %{expand:
@@ -88,15 +89,13 @@ package or when debugging this package.
     /usr/lib/rpm/brp-python-hardlink
     %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
 %{nil}}
-}
 BuildRequires: scl-utils-build
 %if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
-Provides: scl-package(%scl)
-Requires: %scl_runtime
+Requires: %{scl_runtime}
+Provides: scl-package(%{scl})
 %endif
 %{?scl_package_override:%scl_package_override}
 }
 
 %scl_require()	%{_scl_prefix}/%1/enable, %1
 %scl_require_package() %1-%2
-

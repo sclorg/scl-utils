@@ -1,3 +1,3 @@
 %__scl_provides	%{_rpmconfigdir}/scldeps.sh --provides %{scl}
 %__scl_requires %{_rpmconfigdir}/scldeps.sh --requires %{scl_runtime}
-%__scl_path	%{?scl:^%{_scl_prefix}/.*$}
+%__scl_path	%{?scl:^%{_scl_prefix}/.*$ || %{_root_sysconfdir}/rpm/macros.%{scl}-config$}
