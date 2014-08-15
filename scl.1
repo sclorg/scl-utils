@@ -8,6 +8,10 @@ scl \- Setup and run software from Software Collection environment
 \fBscl\fP \fI<action>\fR \fI<collection1>\fR [\fI<collection2> ...\fR] -- \fI<command>\fR
 .PP
 \fBscl\fP {\fB-l|--list\fP} [\fI<collection1> <collection2> ...\fR]
+.PP
+\fBscl register\fP \fI<path>\f
+.PP
+\fBscl deregister\fP \fI<collection>\fR [\fB--force\fP]
 .SH "DESCRIPTION"
 .PP
 This manual page documents \fBscl\fP, a
@@ -46,6 +50,14 @@ details may be found in the documentation of the particular collection.
 Lists all installed Software Collections on the system.
 .IP "\fB-l, --list\fP \fI<collection1> <collection2> ...\fR"
 If a collection name is specified then list of installed packages belonging to the collection is listed.
+.IP "\fBregister\fP \fI<path>\fR"
+If \fI<path>\fR leads to valid SCL file structure, \fBscl\fP will register that as a SCL.
+\fI<path>\fR directory needs to contain \fBenable\fR  scriptlet and \fBroot\fP directory,
+to be considered valid SCL.
+<path> needs to be an absolute path to the collection location.
+.IP "\fBderegister\fP \fI<collection>\fR [\fB--force\fP]"
+\fI<collection>\fR will no longer be considered SCL.
+If the \fI<collection>\fR was installed locally, then the use of \fB--force\fP is needed.i
 .SH "EXAMPLES"
 .TP
 scl enable example 'less --version'
@@ -63,6 +75,11 @@ list all installed collections
 .TP
 scl -l example
 list all packages within example collection
+scl register /foo/bar
+registers new collection with a name bar
+.TP
+scl deregister bar --force
+forces the deregistration of collection bar
 .TP
 A wrapper script must use proper quoting or command separator like in the
 following examples
