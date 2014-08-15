@@ -175,10 +175,15 @@ static void list_collections() {
 
 	for (i=0; i<n; i++) {
 		if (*nl[i]->d_name != '.') {
-			printf("%s\n", nl[i]->d_name);
+			if (col_available(nl[i]->d_name) == 0) {
+				printf("%s\n", nl[i]->d_name);
+			}
 		}
 	}
 
+	for (i = 0; i < n; i++) {
+		free(nl[i]);
+	}
 	free(nl);
 }
 
@@ -224,7 +229,10 @@ static char **read_script_output( char *ori_cmd ) {
 	unlink(tmp);
 
 	ls = 0x100;
-	lines = malloc(ls*sizeof(char*));
+	if ((lines = (char **)malloc(ls*sizeof(char*))) == NULL) {
+		fprintf(stderr, "Unable to allocate memory.\n");
+		exit(EXIT_FAILURE);
+	}
 	*lines = NULL;
 
 	for (mp=m; mp && mp < &m[sb.st_size];) {
