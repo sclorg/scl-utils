@@ -67,9 +67,9 @@ package or when debugging this package.
 %global _sbindir		%{_exec_prefix}/sbin
 %global _libexecdir		%{_exec_prefix}/libexec
 %global _datadir		%{_prefix}/share
-%global _sysconfdir		%{_root_sysconfdir}/opt/%{scl_vendor}/%{scl}
-%global _sharedstatedir		%{_root_localstatedir}/opt/%{scl_vendor}/%{scl}/lib
-%global _localstatedir		%{_root_localstatedir}/opt/%{scl_vendor}/%{scl}
+%global _sysconfdir		%{_root_sysconfdir}/opt/%{scl_vendor}/scls/%{scl}
+%global _sharedstatedir		%{_root_localstatedir}/opt/%{scl_vendor}/scls/%{scl}/lib
+%global _localstatedir		%{_root_localstatedir}/opt/%{scl_vendor}/scls/%{scl}
 %global _libdir			%{_exec_prefix}/%{_lib}
 %global _includedir		%{_prefix}/include
 %global _infodir		%{_datadir}/info
