@@ -3,15 +3,20 @@
 scl \- Setup and run software from Software Collection environment
 .SH "SYNOPSIS"
 .PP
-\fBscl\fP \fI<action>\fR \fI<collection1>\fR [\fI<collection2> ...\fR] \fI<command>\fR
+\fBscl enable|run\fP \fI<collection1>\fR [\fI<collection2> ...\fR] \fI<command>\fR [\fB-x|--exec\fP]
+
 .PP
-\fBscl\fP \fI<action>\fR \fI<collection1>\fR [\fI<collection2> ...\fR] -- \fI<command>\fR
+\fBscl load|unload\fP \fI<collection1>\fR [\fI<collection2> ...\fR]
 .PP
-\fBscl\fP {\fB-l|--list\fP} [\fI<collection1> <collection2> ...\fR]
+\fBscl list-collections\fP
 .PP
-\fBscl register\fP \fI<path>\f
+\fBscl list-packages\fP \fI<collection>\fR
 .PP
-\fBscl deregister\fP \fI<collection>\fR [\fB--force\fP]
+\fBscl register\fP \fI<path>\fR
+.PP
+\fBscl deregister\fP \fI<collection>\fR [\fB-f|--force\fP]
+.PP
+\fBscl man\fP \fI<collection>\fR
 .SH "DESCRIPTION"
 .PP
 This manual page documents \fBscl\fP, a
@@ -22,59 +27,61 @@ root hierarchy but is present in an alternative location. This application can s
 and benefit from software installed in the root filesystem. In order to let an application
 be visible to the system one has to use \fBscl\fP utility as an interface.
 .PP
-\fI<action>\fR is a script name to execute in a bash environment before the application
-itself takes in executed. Currently only \fBenable\fP scriptlet is mandatory which is needed
-to update search paths, etc.
+.SH "OPTIONS"
 .PP
-One can enable more Software Collections if needed and therefore one can use multiple
-collections which are enabled by the left-right order as present on \fBscl\fP command-line.
-.PP
-\fI<command>\fR marks specified Software Collections as enabled. Executes the script,
-which is expected to set proper environment. Executes the \fI<command>\fR.
-Control is returned back to the caller with the original environment as soon
-as the command finishes. If \fI<command>\fR is '-' (dash) then it is
-read from the standard input.
-.PP
+.IP "\fBenable, run\fP \fI<collection1>\fR [\fI<collection2> ...\fR] \fI<command>\fR [\fB-x|--exec\fP]"
+Run \fI<command>\fR within the environment of the given collections. Each collection contains a module file that defines how collection modifies the environment. First the environment is modified according to module files of the given collections and then \fI<command>\fR is executed. Control is returned back to the caller with the original environment as soon as the \fI<command>\fR finishes. If \fI<command>\fR is '-' (dash) then it is read from the standard input.
+
+If \fB--exec\fP is specified then function exec() will be used for command execution otherwise function system() will be used.
+
 Note: if you use \fI<command>\fR consisting of multiple arguments, you either need to
 use quotes or the \fB--\fP command separator. Everything that follows the
 separator will be considered a command or its argument.
-.PP
+
 Note: some commands modify user environment in some way. Those commands may
 potentially break SCLs, as their activation also usually depends on env.
 modification as well. Typical examples of such commands are \fBsu\fP and
 \fBsudo\fP. Every collection modifies the environment differently, thus more
 details may be found in the documentation of the particular collection.
-.SH "OPTIONS"
-.PP
-.IP "\fB-l, --list\fP"
+.IP "\fBload\fP \fI<collection1>\fR [\fI<collection2> ...\fR]
+Load the given collections into current shell. The environment of current shell is modified according to module files of the collections.
+.IP "\fBunload\fP \fI<collection1>\fR [\fI<collection2> ...\fR]
+Unload the given collections from current shell. The environment of current shell is returned back to the state before loading the collections.
+.IP "\fBlist-collections\fP"
 Lists all installed Software Collections on the system.
-.IP "\fB-l, --list\fP \fI<collection1> <collection2> ...\fR"
+.IP "\fBlist-packages\fP \fI<collection1> <collection2> ...\fR"
 If a collection name is specified then list of installed packages belonging to the collection is listed.
 .IP "\fBregister\fP \fI<path>\fR"
 If \fI<path>\fR leads to valid SCL file structure, \fBscl\fP will register that as a SCL.
-\fI<path>\fR directory needs to contain \fBenable\fR  scriptlet and \fBroot\fP directory,
+\fI<path>\fR directory needs to contain \fBmodule\fR file and \fBroot\fP directory,
 to be considered valid SCL.
 <path> needs to be an absolute path to the collection location.
-.IP "\fBderegister\fP \fI<collection>\fR [\fB--force\fP]"
+.IP "\fBderegister\fP \fI<collection>\fR [\fB-f|--force\fP]"
 \fI<collection>\fR will no longer be considered SCL.
 If the \fI<collection>\fR was installed locally, then the use of \fB--force\fP is needed.i
+.IP "\fBman\fP \fI<collection>\fR
+Show manual page for \fI<collection>\fR.
 .SH "EXAMPLES"
 .TP
 scl enable example 'less --version'
 runs command 'less --version' in the environment with collection 'example' enabled
 .TP
-scl enable foo bar bash
-runs bash instance with foo and bar Software Collections enabled
+scl load foo bar
+Load foo and bar Software Collections into current shell
+.TP
+scl unload foo bar
+Unload foo and bar Software Collections from current shell
 .TP
 cat my_command | scl enable baz -
 run set of commands listed in my_command file in the environment with baz Software Collection
 enabled
 .TP
-scl -l
+scl list-collections
 list all installed collections
 .TP
-scl -l example
+scl list-packages example
 list all packages within example collection
+.TP
 scl register /foo/bar
 registers new collection with a name bar
 .TP

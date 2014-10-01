@@ -1,7 +1,9 @@
-# scl-utils RPM macros
+# scl RPM macros
 #
 # Copyright (C) 2012 Red Hat, Inc.
-#   Written by Jindrich Novy <jnovy@redhat.com>.
+#   Written by: Jindrich Novy <jnovy@redhat.com>.
+#               Jan Zeleny <jzeleny@redhat.com> and
+#               Albert Uchytil <auchytil@redhat.com>
 
 %scl_debug() %{expand:
 %define old_debug %{lua:print(rpm.expand("%{debug_package}"):len())}
@@ -90,7 +92,7 @@ package or when debugging this package.
     /usr/lib/rpm/brp-python-hardlink
     %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
 %{nil}}
-BuildRequires: scl-utils-build
+BuildRequires: scl-build
 %if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
 Requires: %{scl_runtime}
 Provides: scl-package(%{scl})

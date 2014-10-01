@@ -1,48 +1,87 @@
 # main function bound to scl command
 _scl()
 {
-  local cur prev opts
-  COMPREPLY=()
+    local cur actions cur_action collections
+    COMPREPLY=()
 
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
-  opts="-l --list"
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    actions="enable run load unload list-collections list-packages man register deregister --help"
 
-  # handle options
-  if [[ ${cur} == -* ]] ; then
-    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
-    return 0
-  fi
+    collections=`scl list-collections`
 
-  local collections=($(find /etc/scl/prefixes -maxdepth 1 -mindepth 1 -type f -exec basename {} \; | sort -u))
+    # Complete action names
+    if ((COMP_CWORD == 1)); then
+        COMPREPLY=( $(compgen -W "${actions}" -- ${cur}) )
+        return 0;
+    fi
 
-  # handle scriptlets; the first parameter must be a scriptlet if it is not an option
-  if ((COMP_CWORD == 1)); then
-    # get array of scriptlets found throughout collections
-    local scriptlets=()
-    for col in ${collections[@]}; do
-        local prefix=`cat /etc/scl/prefixes/$col`
-        scriptlets+=($(find $prefix/$col/* -maxdepth 1 -type f -exec basename {} \; | sort -u))
-    done
-    scriptlets_str=`echo ${scriptlets[@]} | sed 's/ /\n/g'| sort -u`
-    COMPREPLY=( $(compgen -W "$scriptlets_str register deregister" -- ${cur}) )
-    return 0
-  fi
+    # If there is command or separator in arguments then stop completition
+    if ((COMP_CWORD > 3)); then
+        for word in "${COMP_WORDS[@]}"; do
+            if [[ ${word} == \'* || ${word} == \"* || ${word} == "--" ]] ; then
+                return 0
+            fi
+        done
+    fi
 
-  # handle commands; does not handle commands without single or double quotes
-  if [[ ${cur} == \'* || ${cur} == \"* ]] ; then
-    # it is a command do not reply with anything
-    return 0
-  fi
+    # Complete one or none action argument
+    if ((COMP_CWORD >= 2)); then
+        cur_action="${COMP_WORDS[1]}"
 
-  # handle collections; if it is not an option or a command, it must be a collection
-  if [ $prev == "register" ]; then
-    compopt -o nospace
-    COMPREPLY=( $(compgen -A directory ${cur}) )
-    return 0
-  fi
-  COMPREPLY=( $(compgen -W "${collections[*]}" -- ${cur}) )
-  return 0
+        case "$cur_action" in
+            # No argument
+            list-collections|--help)
+                return 0
+            ;;
+
+            # Argument is collection name
+            list-packages|man)
+                if ((COMP_CWORD == 2)); then
+                    COMPREPLY=( $(compgen -W  "$collections" -- ${cur}) )
+                fi
+                return 0
+            ;;
+
+            # Argument is collection name or "-f" or "--force"
+            deregister)
+                if ((COMP_CWORD == 2)); then
+                    COMPREPLY=( $(compgen -W  "$collections --force -f" -- ${cur}))
+                fi
+                if [ "$COMP_CWORD" -eq 3 -a  "(" "${COMP_WORDS[2]}" == "--force" -o "${COMP_WORDS[2]}" == "-f" ")" ]; then
+                    COMPREPLY=( $(compgen -W  "$collections" -- ${cur}))
+                fi
+                return 0
+            ;;
+
+            # Argument is directory
+            register)
+                compopt -o plusdirs
+                if ((COMP_CWORD == 2)); then
+                    COMPREPLY=( $(compgen -A  directory -- ${cur}) )
+                fi
+                return 0
+            ;;
+
+            # Arguments are collections or "-x" or "--exec"
+            run|enable)
+                if ((COMP_CWORD == 2)); then
+                    COMPREPLY=( $(compgen -W  "$collections -x --exec" -- ${cur}) )
+                else
+                    COMPREPLY=( $(compgen -W  "$collections" -- ${cur}) )
+                fi
+                return 0
+            ;;
+
+            # Arguments are collections 
+            load|unload)
+                COMPREPLY=( $(compgen -W  "$collections" -- ${cur}) )
+                return 0
+            ;;
+            *)
+            ;;
+        esac
+    fi
+
 }
 
 # bind the scl command to the _scl function for completion
