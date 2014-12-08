@@ -55,4 +55,6 @@ scl_rc show_man(const char *colname);
  */
 void release_scllib_cache();
 
+char **list_enabled_collections();
+
 #endif

@@ -25,7 +25,6 @@
  * argv[1] = "enable collectionX"
  * argv[2] = "./test.py"
  * argv[n] = "argn"
- * TODO: unit test this
  */
 static int parse_shebang(int argc, char *argv[],
                   int *_shebang_argc, char ***_shebang_argv) {

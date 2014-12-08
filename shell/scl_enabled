@@ -1,0 +1,15 @@
+#!/bin/sh
+eval "SCLS=(${X_SCLS[*]})"
+[ -z "$SCLS" ] && exit 1
+[ -z "$*" ] && exit 0
+for scl in $*; do
+	FOUND=0
+	for i in `seq 0 ${#SCLS[@]}`; do
+		if [ "${SCLS[$i]}" == "$scl" ]; then
+			FOUND=1;
+			break;
+		fi;
+	done
+	[ $FOUND == 0 ] && exit 1;
+done
+exit 0

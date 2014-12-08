@@ -6,6 +6,7 @@
 char *get_command_output(const char *path, char *const argv[], int fileno);
 scl_rc prepare_args(const char *cmd, char ***_argv);
 int count_words(const char *str, char ch);
+void unescape_string(char *str);
 void strip_trailing_chars(char *str, char char_to_strip);
 char **split(char *str, char delim);
 void print_string_array(char *const *array);

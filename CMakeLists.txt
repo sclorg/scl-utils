@@ -1,5 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-PROJECT(scl)
+PROJECT(scl-utils)
 SET(scl_VERSION_MAJOR 2)
 SET(scl_VERSION_MINOR 0)
 SET(scl_VERSION_PATCH 0)
@@ -30,6 +30,7 @@ INSTALL(PROGRAMS ${rpmHelpers} rpm/scldeps.sh DESTINATION /usr/lib/rpm)
 
 INSTALL(FILES doc/scl.1 DESTINATION share/man/man1)
 INSTALL(PROGRAMS shell/scl-completion.bash DESTINATION /etc/bash_completion.d)
+INSTALL(PROGRAMS shell/scl_enabled DESTINATION /usr/bin)
 
 ## Enable this with new SCL where scl itself is just a bash function
 INSTALL(PROGRAMS shell/scl-init.sh DESTINATION /etc/profile.d)
@@ -37,4 +38,4 @@ INSTALL(PROGRAMS shell/scl-init.sh DESTINATION /etc/profile.d)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 ENABLE_TESTING()
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(tests)
+#ADD_SUBDIRECTORY(tests)

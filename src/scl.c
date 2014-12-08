@@ -14,6 +14,7 @@
 #include "args.h"
 #include "lib_common.h"
 #include "debug.h"
+#include "fallback.h"
 
 /**
  * Prints help on stderr.
@@ -57,6 +58,7 @@ int main(int argc, char *argv[]) {
         return ret;
     }
 
+
     switch (args->action) {
         case ACTION_NONE:
             print_usage(argv[0]);
@@ -78,7 +80,11 @@ int main(int argc, char *argv[]) {
             break;
 
         case ACTION_COMMAND:
-            ret = run_command(args->collections, args->command, args->exec_flag);
+            if (has_old_collection(args->collections)) {
+                ret = fallback_run_command(args->collections, args->command);
+            } else {
+                ret = run_command(args->collections, args->command, args->exec_flag);
+            }
             break;
         case ACTION_REGISTER:
             ret = register_collection(args->colpaths[0]);

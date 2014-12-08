@@ -152,6 +152,25 @@ void strip_trailing_chars(char *str, char char_to_strip)
     }
 }
 
+void unescape_string(char *str)
+{
+    int str_len = strlen(str);
+    int si, ti = 0;
+
+    for (si = 0; si < str_len; si++) {
+        if (str[si] == '\\') {
+            si++;
+            if (si == str_len) {
+                break;
+            }
+        }
+
+        str[ti++] = str[si];
+    }
+    str[ti] = '\0';
+}
+
+
 char **split(char *str, char delim)
 {
     char **parts, *p;

@@ -18,6 +18,7 @@
 #include "debug.h"
 #include "lib_common.h"
 #include "sclmalloc.h"
+#include "fallback.h"
 
 char **installed_collections = NULL;
 
@@ -59,7 +60,8 @@ static scl_rc get_env_vars(const char *colname, char ***_vars)
 
     /*
      * Expected format of string stored in variable output is following:
-     * var1=value1 ;export value1 ; var2=value2 ;export value2;...
+     * var1=value1 ;export value1 ; var2=value2 ;export value2;
+     * var3=value\ with\ spaces
      */
 
     vars = parts = split(output, ';');
@@ -68,6 +70,7 @@ static scl_rc get_env_vars(const char *colname, char ***_vars)
     while (*parts !=  NULL) {
         if (strchr(*parts, '=')) {
             strip_trailing_chars(*parts, ' ');
+            unescape_string(*parts);
             vars[i++] = xstrdup(*parts);
         }
         parts++;
@@ -209,6 +212,11 @@ scl_rc run_command(char * const colnames[], const char *cmd, bool exec)
     }
 
     while (*colnames != NULL) {
+        if (fallback_is_collection_enabled(*colnames)) {
+            colnames++;
+            continue;
+        }
+
         ret = collection_exists(*colnames, &exists);
         if (ret != EOK) {
             goto exit;
@@ -271,15 +279,17 @@ exit:
 
 scl_rc list_packages_in_collection(const char *colname, char ***_pkgnames)
 {
-    char **lines;
-    int lines_allocated = 10;
-    int lines_count = 0;
+    char **srpms, **rpms;
+    int srpms_allocated = 10, rpms_allocated = 1;
+    int srpms_count = 0, rpms_count = 0;
+
     rpmts ts = NULL;
     rpmdbMatchIterator mi = NULL;
     Header h = NULL;
     char *provide = NULL;
     scl_rc ret = EOK;
     bool exists;
+    const char *srpm;
 
     ret = collection_exists(colname, &exists);
     if (ret != EOK) {
@@ -295,34 +305,49 @@ scl_rc list_packages_in_collection(const char *colname, char ***_pkgnames)
         return ERPMLIB;
     }
 
-    lines = xmalloc(lines_allocated * sizeof(*lines));
+    srpms = xmalloc(srpms_allocated * sizeof(*srpms));
 
     xasprintf(&provide, "scl-package(%s)", colname);
 
     ts = rpmtsCreate();
     mi = rpmtsInitIterator(ts, RPMDBI_PROVIDENAME, provide, 0);
+    while ((h = rpmdbNextIterator(mi)) != NULL) {
 
-    do {
-        lines_count++;
-        if (lines_count > lines_allocated) {
-            lines_allocated <<= 1;
-            lines = xrealloc(lines, lines_allocated * sizeof(*lines));
+        srpms[srpms_count++] = headerGetAsString(h, RPMTAG_SOURCERPM);
+
+        if (srpms_count == srpms_allocated) {
+            srpms_allocated <<= 1;
+            srpms = xrealloc(srpms, srpms_allocated * sizeof(*srpms));
         }
-
-        h = rpmdbNextIterator(mi);
-        if (h != NULL) {
-            lines[lines_count - 1] = headerGetAsString(h, RPMTAG_NEVRA);
-        } else {
-            lines[lines_count - 1] = NULL;
-        }
-    } while (h != NULL);
-
-    *_pkgnames = lines;
-
+    }
+    srpms[srpms_count] = NULL;
     mi = rpmdbFreeIterator(mi);
-    ts = rpmtsFree(ts);
     provide = _free(provide);
 
+    rpms = xmalloc(rpms_allocated * sizeof(*rpms));
+    mi = rpmtsInitIterator(ts, RPMDBI_PACKAGES, NULL, 0);
+    while ((h = rpmdbNextIterator(mi)) != NULL) {
+
+        srpm = headerGetString(h, RPMTAG_SOURCERPM);
+
+        for (int i = 0; i < srpms_count; i++) {
+            if (!strcmp(srpm, srpms[i])) {
+                rpms[rpms_count++] = headerGetAsString(h, RPMTAG_NEVRA);
+                break;
+            }
+        }
+
+        if (rpms_count == rpms_allocated) {
+            rpms_allocated <<= 1;
+            rpms = xrealloc(rpms, rpms_allocated * sizeof(*rpms));
+        }
+    }
+    rpms[rpms_count] = NULL;
+    mi = rpmdbFreeIterator(mi);
+    ts = rpmtsFree(ts);
+    srpms = free_string_array(srpms);
+
+    *_pkgnames = rpms;
     return ret;
 }
 
