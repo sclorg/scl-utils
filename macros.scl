@@ -42,7 +42,7 @@ package or when debugging this package.
 %global pkg_name		%1
 %global scl_name		%{scl}
 %global scl_runtime		%{scl}-runtime
-%{!?scl_basedir:		%global scl_basedir /opt}
+%global scl_basedir		/opt
 %{!?scl_vendor:			%global scl_vendor rh}
 %{!?_scl_prefix:		%global _scl_prefix %{scl_basedir}/%{scl_vendor}}
 %global _scl_scripts		%{_scl_prefix}/%{scl}
@@ -67,9 +67,12 @@ package or when debugging this package.
 %global _sbindir		%{_exec_prefix}/sbin
 %global _libexecdir		%{_exec_prefix}/libexec
 %global _datadir		%{_prefix}/share
-%global _sysconfdir		%{_root_sysconfdir}/opt/%{scl_vendor}/scls/%{scl}
-%global _sharedstatedir		%{_root_localstatedir}/opt/%{scl_vendor}/scls/%{scl}/lib
-%global _localstatedir		%{_root_localstatedir}/opt/%{scl_vendor}/scls/%{scl}
+%global _sysconfdir		%{_scl_root}/etc
+%{?nfsmountable:		%global _sysconfdir %{_root_sysconfdir}%{_scl_prefix}/scls/%{scl}}
+%global _sharedstatedir		%{_scl_root}/var/lib
+%{?nfsmountable:		%global _sharedstatedir %{_root_localstatedir}%{_scl_prefix}/scls/%{scl}/lib}
+%global _localstatedir		%{_scl_root}/var
+%{?nfsmountable:		%global _localstatedir %{_root_localstatedir}%{_scl_prefix}/scls/%{scl}}
 %global _libdir			%{_exec_prefix}/%{_lib}
 %global _includedir		%{_prefix}/include
 %global _infodir		%{_datadir}/info
