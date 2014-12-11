@@ -85,6 +85,7 @@ static int check_directory(const char *dir_name, struct stat *sb, int *count, st
 
     if ((*count = scandir(dir_name, nl, 0, alphasort)) < 0) {
         perror("scandir");
+        fprintf(stderr, "%s\n", dir_name);
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -109,12 +110,14 @@ static int get_collection_dir_path(char *col_name, char **_col_dir) {
 
     if (stat(file_path, &st) != 0) {
         perror("Unable to get file status");
+        fprintf(stderr, "%s\n", file_path);
         goto done;
     }
 
     fd = open(file_path, O_RDONLY);
     if (fd < 0) {
         perror("Unable to open file");
+        fprintf(stderr, "%s\n", file_path);
         goto done;
     }
 
@@ -398,6 +401,44 @@ static int check_valid_collection(char *col_dir) {
     return missing_root || missing_enable;
 }
 
+static int run_script(char *script_path, char *script_name) {
+    char *script = NULL;
+    char *cmd = NULL;
+    int status;
+    int ret = EXIT_FAILURE;
+
+    if (script_path[strlen(script_path) - 1] == '/') {
+        check_asprintf(&script, "%s%s", script_path, script_name);
+    } else {
+        check_asprintf(&script, "%s/%s", script_path, script_name);
+    }
+
+    if (!access(script, F_OK)) {
+        check_asprintf(&cmd, "/bin/bash %s", script);
+        status = system(cmd);
+        if (status == -1) {
+            perror("Unable to execute script\n");
+            fprintf(stderr, "%s\n", script);
+            goto done;
+        }
+        if (!WIFEXITED(status)) {
+            fprintf(stderr, "Script %s didn't terminate normally\n", script);
+            goto done;
+        }
+        if (WEXITSTATUS(status)) {
+            fprintf(stderr, "Script %s returned nonzero return code\n", script);
+            goto done;
+        }
+    }
+
+    ret = EXIT_SUCCESS;
+
+done:
+    free(script);
+    free(cmd);
+    return ret;
+}
+
 static int register_collection(char *col_path) {
     FILE *f;
     char *col = NULL;
@@ -410,7 +451,8 @@ static int register_collection(char *col_path) {
     }
 
     if (access(col_path, F_OK)) {
-        perror("Unable to register collection");
+        perror("Directory doesn't exist");
+        fprintf(stderr, "%s\n", col_path);
         return EXIT_FAILURE;
     }
 
@@ -438,15 +480,29 @@ static int register_collection(char *col_path) {
     f = fopen(new_file, "w+");
     if (f == NULL) {
         perror("Unable to open file");
+        fprintf(stderr, "%s\n", new_file);
         free(col);
         free(new_file);
         return EXIT_FAILURE;
     }
 
     fprintf(f, "%s\n", col);
+    fclose(f);
+
+    if (run_script(col_path, "register")) {
+        fprintf(stderr, "Execution of register script failed\n");
+        if (unlink(new_file)) {
+            perror("Unable to remove file: ");
+            fprintf(stderr, "%s\n", new_file);
+            fprintf(stderr, "Remove this file manually before a new try to register collection!\n");
+        }
+        free(new_file);
+        free(col);
+        return EXIT_FAILURE;
+    }
+
     printf("Collection succesfully registered.\n"
            "The collection can now be enabled using 'scl enable %s <command>'\n", name);
-    fclose(f);
     free(new_file);
     free(col);
 
@@ -473,6 +529,7 @@ static int check_package(char *file_path, int *_status) {
 static int deregister_collection(char *col_path, bool force) {
     char *col = NULL;
     char *col_name = NULL;
+	char *col_dir = NULL;
 
     if (get_collection_conf_path(col_path, &col_name)) {
         free(col);
@@ -496,13 +553,30 @@ static int deregister_collection(char *col_path, bool force) {
         }
     }
 
+    if (get_collection_dir_path(col_path, &col_dir)) {
+        free(col_name);
+        free(col);
+        return EXIT_FAILURE;
+    }
+
+    if (run_script(col_dir, "deregister")) {
+        fprintf(stderr, "Execution of deregister script failed\n");
+        free(col_dir);
+        free(col_name);
+        free(col);
+        return EXIT_FAILURE;
+    }
+
     if (remove(col_name)) {
-        perror("Unable to deregister collection");
+        perror("Unable to delete file");
+        fprintf(stderr, "%s\n", col_name);
+        free(col_dir);
         free(col_name);
         free(col);
         return EXIT_FAILURE;
     }
     printf("Collection successfully deregistered.\n");
+    free(col_dir);
     free(col_name);
     free(col);
     return EXIT_SUCCESS;
