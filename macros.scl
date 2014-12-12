@@ -83,7 +83,7 @@ package or when debugging this package.
 %global _defaultdocdir		%{_docdir}
 }
 %{?scl_dependency_generators:%scl_dependency_generators}
-%global scl_pkg_name		%{scl_pkg_prefix}%{pkg_name}
+%global scl_pkg_name		%{scl_full_prefix}%{pkg_name}
 %scl_debug
 %global __os_install_post %{expand:
     /usr/lib/rpm/brp-scl-compress %{_scl_root}
