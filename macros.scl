@@ -41,10 +41,12 @@ package or when debugging this package.
 %scl_package() %{expand:%{!?_root_prefix:
 %global pkg_name		%1
 %global scl_name		%{scl}
-%global scl_runtime		%{scl}-runtime
 %global scl_basedir		/opt
 %{!?scl_vendor:			%global scl_vendor rh}
 %{!?_scl_prefix:		%global _scl_prefix %{scl_basedir}/%{scl_vendor}}
+%global scl_meta_name		%{?scl_vendor_in_name:%{scl_vendor}-}%{scl}
+%global scl_full_prefix		%{scl_meta_name}-
+%global scl_runtime		%{scl_meta_name}-runtime
 %global _scl_scripts		%{_scl_prefix}/%{scl}
 %global _scl_root		%{_scl_prefix}/%{scl}/root
 %global _root_prefix		%{_prefix}
@@ -81,7 +83,7 @@ package or when debugging this package.
 %global _defaultdocdir		%{_docdir}
 }
 %{?scl_dependency_generators:%scl_dependency_generators}
-%global scl_pkg_name		%{scl}-%{pkg_name}
+%global scl_pkg_name		%{scl_pkg_prefix}%{pkg_name}
 %scl_debug
 %global __os_install_post %{expand:
     /usr/lib/rpm/brp-scl-compress %{_scl_root}
