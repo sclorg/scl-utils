@@ -1,3 +1,4 @@
 %__sclbuild_provides %{_rpmconfigdir}/scldeps.sh --provides %{scl}
-%__sclbuild_requires %{_rpmconfigdir}/scldeps.sh --requires scl-build %{scl_runtime}
+%__sclbuild_requires %{_rpmconfigdir}/scldeps.sh --requires scl-utils-build %{scl_runtime}
 %__sclbuild_path     %{?scl:%{_root_sysconfdir}/rpm/macros.%{scl}-config$}
+

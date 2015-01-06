@@ -1,7 +1,7 @@
 SET( PRG_NAME "scl" )
 SET(MODULES_PATH "/etc/scl/modulefiles" )
 SET(MODULE_CMD "/usr/bin/modulecmd" )
-SET(CONF_DIR "/etc/scl/prefixes/" )
+SET(CONF_DIR "/etc/scl/conf/" )
 CONFIGURE_FILE( config.h.cmake config.h )
 
 SET( CMAKE_C_FLAGS "-Wall -pedantic --std=gnu99 -D_GNU_SOURCE -g" )

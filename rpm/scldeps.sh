@@ -5,12 +5,17 @@
     exit 0
 }
 
-case $1 in
+option=$1
+shift 1
+
+case $option in
 -P|--provides)
-    echo -n "scl-package($2)"
+    echo -n "scl-package($1)"
     ;;
 -R|--requires)
-    echo -n "$2"
+    for o in $@; do
+        echo "$o"
+    done
     ;;
 esac
 exit 0

@@ -265,9 +265,24 @@ int scl_args_get(int argc, char *argv[], struct scl_args **_args)
 
     if (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h")) {
         args->action = ACTION_NONE;
-    } else if (!strcmp(argv[1], "list-collections")) {
+    } else if ( argc == 2 && (
+        !strcmp(argv[1], "list-collections") ||
+        !strcmp(argv[1], "--list") ||
+        !strcmp(argv[1], "-l"))) {
+
+        if (strcmp(argv[1], "list-collections")) {
+            debug("You use deprecated syntax \"-l|--list\", use \"list-collections\" instead.\n");
+        }
         args->action = ACTION_LIST_COLLECTIONS;
-    } else if (!strcmp(argv[1], "list-packages")) {
+
+    } else if (!strcmp(argv[1], "list-packages") ||
+        !strcmp(argv[1], "--list") ||
+        !strcmp(argv[1], "-l")) {
+
+        if (strcmp(argv[1], "list-packages")) {
+            debug("You use deprecated syntax \"-l|--list\", use \"list-packages\" instead.\n");
+        }
+
         if (argc < 3) {
             ret = EINPUT;
             goto fail;

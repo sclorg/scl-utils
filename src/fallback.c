@@ -5,7 +5,9 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
+#include "scllib.h"
 #include "sclmalloc.h"
 #include "config.h"
 #include "errors.h"
@@ -26,59 +28,6 @@ bool has_old_collection(char * const colnames[])
         colnames++;
     }
     return false;
-}
-
-static scl_rc get_collection_path(const char *colname, char **_colpath)
-{
-    FILE *fp = NULL;
-    char *file_path = NULL;
-    char *prefix;
-    char *colpath = NULL;
-    struct stat st;
-    scl_rc ret = EOK;
-
-    xasprintf(&file_path, "%s%s", SCL_CONF_DIR, colname);
-
-    if (stat(file_path, &st) != 0) {
-        debug("Unable to get file status %s: %s\n", file_path, strerror(errno));
-        ret = EDISK;
-        goto exit;
-    }
-
-    fp = fopen(file_path, "r");
-    if (fp == NULL) {
-        debug("Unable to open file %s: %s\n", file_path, strerror(errno));
-        ret = EDISK;
-        goto exit;
-    }
-
-    prefix = xmalloc(st.st_size + 1);
-    if (fscanf(fp, "%s", prefix) != 1) {
-        debug("Unable to read file %s: %s\n", file_path, strerror(errno));
-        ret = EDISK;
-        goto exit;
-    }
-
-    if (prefix[strlen(prefix) - 1] == '/') {
-        xasprintf(&colpath, "%s%s", prefix, colname);
-    } else {
-        xasprintf(&colpath, "%s/%s", prefix, colname);
-    }
-
-    *_colpath = colpath;
-
-exit:
-    if (ret != EOK) {
-        colpath = _free(colpath);
-    }
-
-    if (fp != NULL) {
-        fclose(fp);
-    }
-    file_path = _free(file_path);
-    prefix = _free(prefix);
-
-    return ret;
 }
 
 bool fallback_is_collection_enabled(const char *colname)
@@ -103,6 +52,84 @@ bool fallback_is_collection_enabled(const char *colname)
         enabled_cols = _free(enabled_cols);
         X_SCLS = _free(X_SCLS);
     }
+
+    return ret;
+}
+
+scl_rc fallback_collection_exists(const char *colname, bool *_exists)
+{
+    char *col_path = NULL;
+    char *conf_file = NULL;
+    scl_rc ret = EOK;
+
+    xasprintf(&conf_file, SCL_CONF_DIR "/%s", colname);
+    *_exists = !access(conf_file, F_OK);
+
+    if (*_exists) {
+        ret = get_collection_path(colname, &col_path);
+        if (ret != EOK) {
+            return ret;
+        }
+
+        *_exists = !access(col_path, F_OK);
+
+    }
+
+    conf_file = _free(conf_file);
+    col_path = _free(col_path);
+
+    return EOK;
+}
+
+scl_rc fallback_get_installed_collections(char ***_colnames)
+{
+    struct dirent **nl;
+    int n, i, i2 = 0;
+    char **colnames;
+    bool col_exists;
+    scl_rc ret = EOK;
+
+    n = scandir(SCL_CONF_DIR, &nl, 0, alphasort);
+    if (n < 0) {
+        debug("Cannot list directory %s: %s\n", SCL_CONF_DIR, strerror(errno));
+        return EDISK;
+    }
+
+    /* Add one item for terminator */
+    colnames = xcalloc(n + 1, sizeof(*colnames));
+
+    for (i = 0; i < n; i++) {
+        if (nl[i]->d_name[0] !=  '.') {
+            ret = fallback_collection_exists(nl[i]->d_name, &col_exists);
+            if (ret != EOK) {
+                goto exit;
+            }
+
+            if (col_exists) {
+                colnames[i2++] = nl[i]->d_name;
+            }
+        }
+    }
+
+    for (i = 0; i < i2; i++) {
+        colnames[i] = xstrdup(colnames[i]);
+    }
+
+    colnames[i2] = NULL;
+    *_colnames = colnames;
+
+exit:
+    if (ret != EOK) {
+        for (i = 0; i < i2; i++) {
+            colnames[i] = _free(colnames[i]);
+        }
+        colnames = _free(colnames);
+    }
+
+    for (i = 0; i < n; i++) {
+        nl[i] = _free(nl[i]);
+    }
+    nl = _free(nl);
 
     return ret;
 }

@@ -1,0 +1,75 @@
+#!/bin/bash
+
+_scl_source_help="Usage: source scl_source <action> [<collection> ...]
+
+Don't use this script outside of SCL scriptlets!
+
+Options:
+    -h, --help    display this help and exit"
+
+if [ $# -eq 0 -o $1 = "-h" -o $1 = "--help" ]; then
+    echo "$_scl_source_help"
+    return 0
+fi
+
+
+if [ -z "$_recursion" ]; then
+    _recursion="false"
+fi
+if [ -z "$_scl_scriptlet_name" ]; then
+    # The only allowed action in the case of recursion is the same
+    # as was the original
+    _scl_scriptlet_name=$1
+fi
+shift 1
+
+if [ -z "$_scl_dir" ]; then
+    # No need to re-define the directory twice
+    _scl_dir=/etc/scl/conf
+    if [ ! -e $_scl_dir ]; then
+        _scl_dir=/etc/scl/prefixes
+    fi
+fi
+
+for arg in "$@"; do
+    _scl_prefix_file=$_scl_dir/$arg
+    _scl_prefix=`cat $_scl_prefix_file 2> /dev/null`
+    if [ $? -ne 0 ]; then
+        echo "Can't read $_scl_prefix_file, $arg is probably not installed."
+        return 1
+    fi
+  
+    # First check if the collection is already in the list
+    # of collections to be enabled
+    for scl in ${_scls[@]}; do
+        if [ $arg == $scl ]; then
+            continue 2
+        fi
+    done
+
+    # Now check if the collection isn't already enabled
+    /usr/bin/scl_enabled $arg > /dev/null 2> /dev/null
+    if [ $? -ne 0 ]; then
+        _scls+=($arg)
+        _scl_prefixes+=($_scl_prefix)
+    fi;
+done
+
+if [ $_recursion == "false" ]; then
+    _i=0
+    _recursion="true"
+    while [ $_i -lt ${#_scls[@]} ]; do
+        _scl_scriptlet_path="${_scl_prefixes[$_i]}/${_scls[$_i]}/${_scl_scriptlet_name}"
+        source "$_scl_scriptlet_path"
+        if [ $? -ne 0 ]; then
+            echo "Can't source $_scl_scriptlet_name, skipping."
+        else
+            export X_SCLS="${_scls[$_i]} $X_SCLS"
+        fi;
+        _i=$(($_i+1))
+    done
+    _scls=()
+    _scl_prefixes=()
+    _scl_scriptlet_name=""
+    _recursion="false"
+fi

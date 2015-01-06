@@ -223,3 +223,17 @@ void *free_string_array(char **array) {
     }
     return NULL;
 }
+
+char *directory_name(const char *_path)
+{
+    char *path, *c;
+
+    path = xstrdup(_path);
+    c = path + strlen(path) - 1;
+    while ( *c != '/' ) {
+        *c = '\0';
+        c--;
+    }
+
+    return path;
+}

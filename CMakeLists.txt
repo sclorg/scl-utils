@@ -31,8 +31,8 @@ INSTALL(PROGRAMS ${rpmHelpers} rpm/scldeps.sh DESTINATION /usr/lib/rpm)
 INSTALL(FILES doc/scl.1 DESTINATION share/man/man1)
 INSTALL(PROGRAMS shell/scl-completion.bash DESTINATION /etc/bash_completion.d)
 INSTALL(PROGRAMS shell/scl_enabled DESTINATION /usr/bin)
+INSTALL(PROGRAMS shell/scl_source DESTINATION /usr/bin)
 
-## Enable this with new SCL where scl itself is just a bash function
 INSTALL(PROGRAMS shell/scl-init.sh DESTINATION /etc/profile.d)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")

@@ -51,10 +51,16 @@ scl_rc deregister_collection(const char *colname, bool force);
 scl_rc show_man(const char *colname);
 
 /*
+ * Get path where collection is located.
+ * @param[in] colname       Name of collection.
+ * @param[out] _colpath     Path where collection is located.
+ * @return                  EOK on succes otherwise err code
+ */
+scl_rc get_collection_path(const char *colname, char **_colpath);
+
+/*
  * Release scllib cache. It has to be called after work with scllib is done.
  */
 void release_scllib_cache();
-
-char **list_enabled_collections();
 
 #endif

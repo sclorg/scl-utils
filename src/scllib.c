@@ -24,11 +24,21 @@ char **installed_collections = NULL;
 
 static scl_rc initialize_env()
 {
+    char *module_path = getenv("MODULEPATH");
+    char *new_module_env;
 
-    if (getenv("MODULEPATH") == NULL) {
-        if(putenv("MODULEPATH=" SCL_MODULES_PATH) != 0) {
-            debug("Impossible to create environment variable "
-                "MODULEPATH: %s\n", strerror(errno));
+    if (!module_path || !strstr(module_path, SCL_MODULES_PATH)) {
+
+        if (module_path) {
+            xasprintf(&new_module_env, "MODULEPATH=" SCL_MODULES_PATH ":%s",
+                module_path);
+        } else {
+            xasprintf(&new_module_env, "MODULEPATH=" SCL_MODULES_PATH);
+        }
+
+        if(putenv(new_module_env) != 0) {
+            debug("Impossible to create environment variable %s: %s\n",
+                new_module_env, strerror(errno));
             return ESYS;
         }
     }
@@ -172,30 +182,56 @@ static scl_rc collection_exists(const char *colname, bool *_exists)
     return ret;
 }
 
-
-static scl_rc get_collection_path(const char *colname, char **_colpath)
+scl_rc get_collection_path(const char *colname, char **_colpath)
 {
-    char **env = NULL;
-    scl_rc ret;
+    FILE *fp = NULL;
+    char *file_path = NULL;
+    char *prefix;
+    char *colpath = NULL;
+    struct stat st;
+    scl_rc ret = EOK;
 
-    ret = get_env_vars(colname, &env);
+    xasprintf(&file_path, "%s%s", SCL_CONF_DIR, colname);
+
+    if (stat(file_path, &st) != 0) {
+        debug("Unable to get file status %s: %s\n", file_path, strerror(errno));
+        ret = EDISK;
+        goto exit;
+    }
+
+    fp = fopen(file_path, "r");
+    if (fp == NULL) {
+        debug("Unable to open file %s: %s\n", file_path, strerror(errno));
+        ret = EDISK;
+        goto exit;
+    }
+
+    prefix = xmalloc(st.st_size + 1);
+    if (fscanf(fp, "%s", prefix) != 1) {
+        debug("Unable to read file %s: %s\n", file_path, strerror(errno));
+        ret = EDISK;
+        goto exit;
+    }
+
+    if (prefix[strlen(prefix) - 1] == '/') {
+        xasprintf(&colpath, "%s%s", prefix, colname);
+    } else {
+        xasprintf(&colpath, "%s/%s", prefix, colname);
+    }
+
+    *_colpath = colpath;
+
+exit:
     if (ret != EOK) {
-        return ret;
+        colpath = _free(colpath);
     }
 
-    ret = ECONFIG;
-    for (int i = 0; env[i] != NULL; i++) {
-        if (!strncmp("COLPATH=", env[i], 8)) {
-            *_colpath = xstrdup(env[i] + 8);
-            ret = EOK;
-            break;
-        }
+    if (fp != NULL) {
+        fclose(fp);
     }
-    if (ret == ECONFIG) {
-        debug("Collection %s has not defined variable COLPATH\n", colname);
-    }
+    file_path = _free(file_path);
+    prefix = _free(prefix);
 
-    env = free_string_array(env);
     return ret;
 }
 
@@ -280,7 +316,7 @@ exit:
 scl_rc list_packages_in_collection(const char *colname, char ***_pkgnames)
 {
     char **srpms, **rpms;
-    int srpms_allocated = 10, rpms_allocated = 1;
+    int srpms_allocated = 10, rpms_allocated = 10;
     int srpms_count = 0, rpms_count = 0;
 
     rpmts ts = NULL;
@@ -291,10 +327,11 @@ scl_rc list_packages_in_collection(const char *colname, char ***_pkgnames)
     bool exists;
     const char *srpm;
 
-    ret = collection_exists(colname, &exists);
+    ret = fallback_collection_exists(colname, &exists);
     if (ret != EOK) {
         return ret;
     }
+
     if (!exists) {
         debug("Collection %s doesn't exists!\n", colname);
         return EINPUT;
@@ -393,24 +430,30 @@ scl_rc register_collection(const char *_colpath)
     scl_rc ret = EOK;
     char *colname, *colpath = NULL, *colroot = NULL;
     char *module_file = NULL, *module_file_link = NULL;
+    char *enable_script = NULL, *conf_file = NULL;
+    char *prefix = NULL;
+    FILE *f = NULL;
     bool exists;
 
     colpath = xstrdup(_colpath);
     strip_trailing_chars(colpath, '/');
     colname = basename(colpath);
+    prefix = directory_name(colpath);
 
     xasprintf(&module_file, "%s/%s", colpath, colname);
+    xasprintf(&enable_script, "%s/enable", colpath);
     xasprintf(&module_file_link, SCL_MODULES_PATH "/%s", colname);
+    xasprintf(&conf_file, SCL_CONF_DIR "/%s", colname);
     xasprintf(&colroot, "%s/root", colpath);
 
-    if (access(module_file, F_OK) == -1 || access(colroot, F_OK) == -1) {
+    if (access(enable_script, F_OK) == -1 || access(colroot, F_OK) == -1) {
         debug("Collection %s is not valid! File %s or file %s doesn't exists: %s\n",
-            colname, module_file, colroot, strerror(errno));
+            colname, enable_script, colroot, strerror(errno));
         ret = EINPUT;
         goto exit;
     }
 
-    ret = collection_exists(colname, &exists);
+    ret = fallback_collection_exists(colname, &exists);
     if (ret != EOK) {
         goto exit;
     }
@@ -420,26 +463,57 @@ scl_rc register_collection(const char *_colpath)
         goto exit;
     }
 
-    if (symlink(module_file, module_file_link) == -1) {
-        debug("Unable to create symlink %s to file %s: %s\n",
-            module_file_link, module_file, strerror(errno));
+    f = fopen(conf_file, "w+");
+    if (f == NULL) {
+        debug("Unable to open file %s: %s\n", conf_file, strerror(errno));
         ret = EDISK;
         goto exit;
+    }
+    if (fprintf(f, "%s\n", prefix) < 0) {
+        debug("Unable to write to file %s: %s\n", conf_file, strerror(errno));
+        ret = EDISK;
+        goto exit;
+    }
+    fclose(f);
+    f = NULL;
+
+    if (access(module_file, F_OK) == 0) {
+        if (symlink(module_file, module_file_link) == -1) {
+            debug("Unable to create symlink %s to file %s: %s\n",
+                module_file_link, module_file, strerror(errno));
+            ret = EDISK;
+            goto exit;
+        }
     }
 
     ret = run_scriptlet(colpath, "register");
     if (ret != EOK) {
-        if (unlink(module_file_link)) {
-            debug("Unable to remove file %s: %s\n", module_file_link,
+        if (unlink(conf_file)) {
+            debug("Unable to remove file %s: %s\n", conf_file,
                 strerror(errno));
             debug("Remove this file manualy before a new try to register collection\n");
+        }
+
+        if (access(module_file_link, F_OK) == 0) {
+            if (unlink(module_file_link)) {
+                debug("Unable to remove file %s: %s\n", module_file_link,
+                    strerror(errno));
+                debug("Remove this file manualy before a new try to register collection\n");
+            }
         }
     }
 
 exit:
+    if (f != NULL) {
+        fclose(f);
+        f = NULL;
+    }
     colpath = _free(colpath);
     module_file = _free(module_file);
     module_file_link = _free(module_file_link);
+    enable_script = _free(enable_script);
+    prefix = _free(prefix);
+
     return ret;
 }
 
@@ -469,11 +543,11 @@ scl_rc deregister_collection(const char *colname, bool force)
 {
     bool exists;
     scl_rc ret = EOK;
-    char *module_file_link = NULL;
-    bool owned;
+    char *module_file_link = NULL, *conf_file = NULL;
+    bool conf_file_owned = false, module_file_owned = false;
     char *colpath;
 
-    ret = collection_exists(colname, &exists);
+    ret = fallback_collection_exists(colname, &exists);
     if (ret != EOK) {
         return ret;
     }
@@ -488,14 +562,20 @@ scl_rc deregister_collection(const char *colname, bool force)
     }
 
     xasprintf(&module_file_link, SCL_MODULES_PATH "/%s", colname);
+    xasprintf(&conf_file, SCL_CONF_DIR "/%s", colname);
 
     if (!force) {
-        ret = owned_by_package(module_file_link, &owned);
+        ret = owned_by_package(conf_file, &conf_file_owned);
         if (ret != EOK) {
             goto exit;
         }
 
-        if (owned) {
+        ret = owned_by_package(module_file_link, &module_file_owned);
+        if (ret != EOK) {
+            goto exit;
+        }
+
+        if (module_file_owned || conf_file_owned) {
             debug("Unable to deregister collection %s: Collection was "
                 "installed as a package, you can use '--force' to"
                 "deregister it.\n", colname);
@@ -510,13 +590,21 @@ scl_rc deregister_collection(const char *colname, bool force)
         goto exit;
     }
 
-    if (unlink(module_file_link) == -1) {
-        debug("Unable to remove file %s: %s\n", module_file_link,
+    if (unlink(conf_file) == -1) {
+        debug("Unable to remove file %s: %s\n", conf_file,
             strerror(errno));
         ret = ESYS;
         goto exit;
     }
 
+    if (access(module_file_link, F_OK) == 0) {
+        if (unlink(module_file_link) == -1) {
+            debug("Unable to remove file %s: %s\n", module_file_link,
+                strerror(errno));
+            ret = ESYS;
+            goto exit;
+        }
+    }
 
 exit:
     module_file_link = _free(module_file_link);
