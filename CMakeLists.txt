@@ -30,6 +30,7 @@ INCLUDE(CPack)
 
 INSTALL(FILES rpm/macros.scl DESTINATION /etc/rpm)
 INSTALL(FILES rpm/scl.attr DESTINATION /usr/lib/rpm/fileattrs)
+INSTALL(FILES rpm/sclbuild.attr DESTINATION /usr/lib/rpm/fileattrs)
 FILE(GLOB rpmHelpers "rpm/brp-scl-*")
 INSTALL(PROGRAMS ${rpmHelpers} rpm/scldeps.sh DESTINATION /usr/lib/rpm)
 
