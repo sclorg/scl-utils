@@ -9,7 +9,9 @@ else
    /usr/bin/scl $@
 fi
 }
-export -f scl
+
+shell=`/bin/basename \`/bin/ps -p $$ -ocomm=\``
+[ "$shell" = "bash" ] && export -f scl # export -f works only in bash
 
 MODULESHOME=/usr/share/Modules
 export MODULESHOME
