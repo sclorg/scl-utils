@@ -232,7 +232,6 @@ void scl_args_free(struct scl_args *args)
         free(args->command);
         args->command = NULL;
     }
-    free(args);
 }
 
 int scl_args_get(int argc, char *argv[], struct scl_args **_args)

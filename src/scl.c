@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
     }
 
     scl_args_free(args);
+    free(args);
     release_scllib_cache();
     return ret;
 }
