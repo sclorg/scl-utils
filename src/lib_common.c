@@ -19,7 +19,7 @@ char *get_command_output(const char *path, char *const argv[], int fileno)
     int pid = 0, status;
     int outpipe[2] = {0, 0};
     FILE *fpipe = NULL;
-    char c;
+    int c;
     char *buffer = NULL;
     int count = 0, alloced = 5;
     int error = 1;
