@@ -236,7 +236,7 @@ void scl_args_free(struct scl_args *args)
 
 int scl_args_get(int argc, char *argv[], struct scl_args **_args)
 {
-    struct scl_args *args;
+    struct scl_args *args = NULL;
     char **shebang_argv = NULL;
     int shebang_argc;
     int ret;
