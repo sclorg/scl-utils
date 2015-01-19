@@ -139,10 +139,7 @@ static int extract_command_stdin(struct scl_args *args)
 
     len = 0;
     while ((r = fread(command+len, 1, BUFSIZ, stdin)) == BUFSIZ) {
-        command = realloc(command, len+BUFSIZ+1);
-        if (command == NULL) {
-            return EMEM;
-        }
+        command = xrealloc(command, len+BUFSIZ+1);
         len += r;
     }
 
