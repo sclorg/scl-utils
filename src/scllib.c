@@ -618,18 +618,33 @@ scl_rc show_man(const char *colname)
     char *colnames[] = {(char *) colname, NULL};
     char *cmd = NULL;
     bool exists;
+    bool need_fallback = false;
 
     ret = collection_exists(colname, &exists);
     if (ret != EOK) {
         return ret;
     }
+
+    if (!exists) {
+        ret = fallback_collection_exists(colname, &exists);
+        if (ret != EOK) {
+            return ret;
+        }
+        need_fallback = true;
+    }
+
     if (!exists) {
         debug("Collection %s doesn't exists!\n", colname);
         return EINPUT;
     }
 
     xasprintf(&cmd, "man %s", colname);
-    ret = run_command(colnames, cmd, true);
+
+    if (need_fallback) {
+        ret = fallback_run_command(colnames, cmd);
+    } else {
+        ret = run_command(colnames, cmd, true);
+    }
 
     cmd = _free(cmd);
     return ret;
