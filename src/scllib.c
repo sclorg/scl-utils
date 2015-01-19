@@ -186,7 +186,7 @@ scl_rc get_collection_path(const char *colname, char **_colpath)
 {
     FILE *fp = NULL;
     char *file_path = NULL;
-    char *prefix;
+    char *prefix = NULL;
     char *colpath = NULL;
     struct stat st;
     scl_rc ret = EOK;
