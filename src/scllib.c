@@ -19,6 +19,7 @@
 #include "lib_common.h"
 #include "sclmalloc.h"
 #include "fallback.h"
+#include "ctype.h"
 
 char **installed_collections = NULL;
 
@@ -206,18 +207,22 @@ scl_rc get_collection_path(const char *colname, char **_colpath)
         goto exit;
     }
 
-    prefix = xmalloc(st.st_size + 1);
-    if (fscanf(fp, "%s", prefix) != 1) {
+    prefix = xcalloc(st.st_size + 1, 1);
+    if (fread(prefix, st.st_size, 1, fp) != 1) {
         debug("Unable to read file %s: %s\n", file_path, strerror(errno));
         ret = EDISK;
         goto exit;
     }
 
-    if (prefix[strlen(prefix) - 1] == '/') {
-        xasprintf(&colpath, "%s%s", prefix, colname);
-    } else {
-        xasprintf(&colpath, "%s/%s", prefix, colname);
+    for (int i = st.st_size - 1; i >= 0; i--) {
+        if (isspace(prefix[i]) || prefix[i] == '/') {
+            prefix[i] = '\0';
+        } else {
+            break;
+        }
     }
+
+    xasprintf(&colpath, "%s/%s", prefix, colname);
 
     *_colpath = colpath;
 
