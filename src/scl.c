@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
             ret = fallback_get_installed_collections(&colls);
             if (ret == EOK) {
                 print_string_array(colls);
-                free_string_array(pkgs);
+                free_string_array(colls);
             }
             break;
 
