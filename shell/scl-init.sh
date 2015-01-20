@@ -6,7 +6,7 @@ if [ "$CMD" = "load" -o "$CMD" = "unload" ]; then
 # declaration so eval is used instead of direct calling of function module
     eval "module $@"
 else
-   /usr/bin/scl $@
+   /usr/bin/scl "$@"
 fi
 }
 

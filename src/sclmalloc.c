@@ -57,6 +57,7 @@ int xasprintf(char **strp, const char *fmt, ...)
     ret = vasprintf(strp, fmt, args);
     if (ret == -1)
         vmefail();
+    va_end(args);
 
     return ret;
 }

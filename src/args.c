@@ -139,10 +139,7 @@ static int extract_command_stdin(struct scl_args *args)
 
     len = 0;
     while ((r = fread(command+len, 1, BUFSIZ, stdin)) == BUFSIZ) {
-        command = realloc(command, len+BUFSIZ+1);
-        if (command == NULL) {
-            return EMEM;
-        }
+        command = xrealloc(command, len+BUFSIZ+1);
         len += r;
     }
 
@@ -235,12 +232,11 @@ void scl_args_free(struct scl_args *args)
         free(args->command);
         args->command = NULL;
     }
-    free(args);
 }
 
 int scl_args_get(int argc, char *argv[], struct scl_args **_args)
 {
-    struct scl_args *args;
+    struct scl_args *args = NULL;
     char **shebang_argv = NULL;
     int shebang_argc;
     int ret;

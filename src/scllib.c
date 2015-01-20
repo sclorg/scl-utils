@@ -19,6 +19,7 @@
 #include "lib_common.h"
 #include "sclmalloc.h"
 #include "fallback.h"
+#include "ctype.h"
 
 char **installed_collections = NULL;
 
@@ -186,7 +187,7 @@ scl_rc get_collection_path(const char *colname, char **_colpath)
 {
     FILE *fp = NULL;
     char *file_path = NULL;
-    char *prefix;
+    char *prefix = NULL;
     char *colpath = NULL;
     struct stat st;
     scl_rc ret = EOK;
@@ -206,18 +207,22 @@ scl_rc get_collection_path(const char *colname, char **_colpath)
         goto exit;
     }
 
-    prefix = xmalloc(st.st_size + 1);
-    if (fscanf(fp, "%s", prefix) != 1) {
+    prefix = xcalloc(st.st_size + 1, 1);
+    if (fread(prefix, st.st_size, 1, fp) != 1) {
         debug("Unable to read file %s: %s\n", file_path, strerror(errno));
         ret = EDISK;
         goto exit;
     }
 
-    if (prefix[strlen(prefix) - 1] == '/') {
-        xasprintf(&colpath, "%s%s", prefix, colname);
-    } else {
-        xasprintf(&colpath, "%s/%s", prefix, colname);
+    for (int i = st.st_size - 1; i >= 0; i--) {
+        if (isspace(prefix[i]) || prefix[i] == '/') {
+            prefix[i] = '\0';
+        } else {
+            break;
+        }
     }
+
+    xasprintf(&colpath, "%s/%s", prefix, colname);
 
     *_colpath = colpath;
 
@@ -618,18 +623,33 @@ scl_rc show_man(const char *colname)
     char *colnames[] = {(char *) colname, NULL};
     char *cmd = NULL;
     bool exists;
+    bool need_fallback = false;
 
     ret = collection_exists(colname, &exists);
     if (ret != EOK) {
         return ret;
     }
+
+    if (!exists) {
+        ret = fallback_collection_exists(colname, &exists);
+        if (ret != EOK) {
+            return ret;
+        }
+        need_fallback = true;
+    }
+
     if (!exists) {
         debug("Collection %s doesn't exists!\n", colname);
         return EINPUT;
     }
 
     xasprintf(&cmd, "man %s", colname);
-    ret = run_command(colnames, cmd, true);
+
+    if (need_fallback) {
+        ret = fallback_run_command(colnames, cmd);
+    } else {
+        ret = run_command(colnames, cmd, true);
+    }
 
     cmd = _free(cmd);
     return ret;
