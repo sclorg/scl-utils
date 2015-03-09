@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 
         case ACTION_COMMAND:
             if (has_old_collection(args->collections)) {
-                ret = fallback_run_command(args->collections, args->command);
+                ret = fallback_run_command(args->collections, args->command, args->exec_flag);
             } else {
                 ret = run_command(args->collections, args->command, args->exec_flag);
             }

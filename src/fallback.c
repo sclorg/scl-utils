@@ -134,7 +134,7 @@ exit:
     return ret;
 }
 
-scl_rc fallback_run_command(char * const colnames[], const char *cmd)
+scl_rc fallback_run_command(char * const colnames[], const char *cmd, bool exec)
 {
     scl_rc ret = EOK;
     char tmp[] = "/var/tmp/sclXXXXXX";
@@ -195,18 +195,29 @@ scl_rc fallback_run_command(char * const colnames[], const char *cmd)
         colnames++;
     }
 
-    fprintf(tfp, "%s\n", cmd);
+    if (exec) {
+        fprintf(tfp, "exec %s\n", cmd);
+    } else {
+        fprintf(tfp, "%s\n", cmd);
+    }
     fclose(tfp);
     tfp = NULL;
 
-    xasprintf(&bash_cmd, "/bin/bash %s", tmp);
-    status = system(bash_cmd);
-    if (status == -1 || !WIFEXITED(status)) {
-        debug("Problem with executing command \"%s\"\n", bash_cmd);
+    if (exec) {
+        execl("/bin/bash", "/bin/bash", tmp, NULL);
+        debug("Problem with executing program %s: %s\n", "/bin/bash", strerror(errno));
         ret = ERUN;
-        goto exit;
+
+    } else {
+        xasprintf(&bash_cmd, "/bin/bash %s", tmp);
+        status = system(bash_cmd);
+        if (status == -1 || !WIFEXITED(status)) {
+            debug("Problem with executing command \"%s\"\n", bash_cmd);
+            ret = ERUN;
+            goto exit;
+        }
+        ret = WEXITSTATUS(status);
     }
-    ret = WEXITSTATUS(status);
 
 exit:
     if (tfp != NULL) {

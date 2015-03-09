@@ -646,7 +646,7 @@ scl_rc show_man(const char *colname)
     xasprintf(&cmd, "man %s", colname);
 
     if (need_fallback) {
-        ret = fallback_run_command(colnames, cmd);
+        ret = fallback_run_command(colnames, cmd, true);
     } else {
         ret = run_command(colnames, cmd, true);
     }
