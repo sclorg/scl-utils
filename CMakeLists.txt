@@ -40,6 +40,8 @@ INSTALL(PROGRAMS shell/scl_enabled DESTINATION /usr/bin)
 INSTALL(PROGRAMS shell/scl_source DESTINATION /usr/bin)
 
 INSTALL(FILES shell/scl-init.sh DESTINATION /etc/profile.d)
+INSTALL(FILES shell/scl-init.csh DESTINATION /etc/profile.d)
+INSTALL(FILES shell/func_scl.csh DESTINATION /etc/scl)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 ENABLE_TESTING()
