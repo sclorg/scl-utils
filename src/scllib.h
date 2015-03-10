@@ -59,6 +59,11 @@ scl_rc show_man(const char *colname);
 scl_rc get_collection_path(const char *colname, char **_colpath);
 
 /*
+ * Return version of scl-utils as a string.
+ */
+const char* get_version();
+
+/*
  * Release scllib cache. It has to be called after work with scllib is done.
  */
 void release_scllib_cache();

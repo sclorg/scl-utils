@@ -101,6 +101,9 @@ int main(int argc, char *argv[]) {
             debug("Missing function scl in your environment!!!\n");
             ret = ECONFIG;
             break;
+        case ACTION_VERSION:
+            printf("%s\n", get_version());
+            break;
     }
 
     scl_args_free(args);

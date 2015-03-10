@@ -655,6 +655,10 @@ scl_rc show_man(const char *colname)
     return ret;
 }
 
+const char* get_version() {
+    return SCL_VERSION;
+}
+
 void release_scllib_cache()
 {
     installed_collections = free_string_array(installed_collections);

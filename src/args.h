@@ -12,6 +12,7 @@
 #define ACTION_MAN 6
 #define ACTION_LOAD 7
 #define ACTION_UNLOAD 8
+#define ACTION_VERSION 9
 
 struct scl_args {
 	int action;
