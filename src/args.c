@@ -384,6 +384,8 @@ int scl_args_get(int argc, char *argv[], struct scl_args **_args)
         if (ret != EOK) {
             goto fail;
         }
+    } else if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-V")) {
+        args->action = ACTION_VERSION;
     } else {
         ret = EINPUT;
         goto fail;

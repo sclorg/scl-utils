@@ -646,13 +646,17 @@ scl_rc show_man(const char *colname)
     xasprintf(&cmd, "man %s", colname);
 
     if (need_fallback) {
-        ret = fallback_run_command(colnames, cmd);
+        ret = fallback_run_command(colnames, cmd, true);
     } else {
         ret = run_command(colnames, cmd, true);
     }
 
     cmd = _free(cmd);
     return ret;
+}
+
+const char* get_version() {
+    return SCL_VERSION;
 }
 
 void release_scllib_cache()
