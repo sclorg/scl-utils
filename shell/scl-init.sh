@@ -1,7 +1,6 @@
-function scl()
+scl()
 {
-local CMD=$1
-if [ "$CMD" = "load" -o "$CMD" = "unload" ]; then
+if [ "$1" = "load" -o "$1" = "unload" ]; then
 # It is possible that function module is not declared in time of this
 # declaration so eval is used instead of direct calling of function module
     eval "module $@"
