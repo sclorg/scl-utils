@@ -44,9 +44,9 @@ modification as well. Typical examples of such commands are \fBsu\fP and
 \fBsudo\fP. Every collection modifies the environment differently, thus more
 details may be found in the documentation of the particular collection.
 .IP "\fBload\fP \fI<collection1>\fR [\fI<collection2> ...\fR]
-Load the given collections into current shell. The environment of current shell is modified according to module files of the collections.
+Load the given collections into current shell. The environment of current shell is modified according to module files of the collections. This command properly works in these shells: bash, zsh, tcsh. You need to source \fB/etc/profile.d/modules.sh\fR and \fB/etc/profile.d/scl-init.sh\fR for this command to work in shells: dash, mksh, ksh. This command is not supported in other shells.
 .IP "\fBunload\fP \fI<collection1>\fR [\fI<collection2> ...\fR]
-Unload the given collections from current shell. The environment of current shell is returned back to the state before loading the collections.
+Unload the given collections from current shell. The environment of current shell is returned back to the state before loading the collections. This command properly works in these shells: bash, zsh, tcsh. You need to source \fB/etc/profile.d/modules.sh\fR and \fB/etc/profile.d/scl-init.sh\fR for this command to work in shells: dash, mksh, ksh. This command is not supported in other shells.
 .IP "\fBlist-collections\fP"
 Lists all installed Software Collections on the system.
 .IP "\fBlist-packages\fP \fI<collection1> <collection2> ...\fR"
