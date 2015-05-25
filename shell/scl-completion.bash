@@ -30,7 +30,7 @@ _scl()
 
         case "$cur_action" in
             # No argument
-            list-collections|--help)
+            list-collections|list-enabled|--help)
                 return 0
             ;;
 

@@ -93,6 +93,29 @@ exit:
     output = _free(output);
     return ret;
 }
+scl_rc get_enabled_collections(char ***_enabled_collections)
+{
+    char **enabled_collections = NULL;
+    char *lm_files = getenv("_LMFILES_");
+
+    if (lm_files != NULL) {
+        lm_files = xstrdup(lm_files);
+        enabled_collections = split(lm_files, ':');
+
+        for (int i = 0; enabled_collections[i] != NULL; i++) {
+            if (!strncmp(SCL_MODULES_PATH, enabled_collections[i],
+                sizeof(SCL_MODULES_PATH - 1))){
+
+                enabled_collections[i] += sizeof(SCL_MODULES_PATH);
+                enabled_collections[i] = xstrdup(enabled_collections[i]);
+            }
+        }
+
+    }
+    lm_files = _free(lm_files);
+    *_enabled_collections = enabled_collections;
+    return EOK;
+}
 
 scl_rc get_installed_collections(char *const **_colnames)
 {

@@ -207,6 +207,71 @@ void print_string_array(char *const *array) {
     }
 }
 
+int string_array_len(char *const *array)
+{
+    int i = 0;
+
+    if (array == NULL) {
+        return 0;
+    }
+    while (array[i] != NULL) {
+        i++;
+    }
+
+    return i;
+}
+
+static int cmpstringp(const void *p1, const void *p2)
+{
+    return strcmp(* (char * const *) p1, * (char * const *) p2);
+}
+
+char **merge_string_arrays(char *const *array1, char *const *array2)
+{
+    char **merged_array = NULL;
+    int len, ix = 0;
+    char *const *arrays[2] = {array1, array2};
+    int array_len[2];
+    int  prev;
+
+    array_len[0] = string_array_len(array1);
+    array_len[1] = string_array_len(array2);
+    len = array_len[0] + array_len[1];
+    if (len == 0) {
+        return NULL;
+    }
+
+    merged_array = xmalloc((len + 1) * sizeof(*merged_array));
+
+    /* Put content of two arrays into one array */
+    for (int i = 0; i < 2; i++) {
+        /* If any of arrays is NULL then skip it */
+        if (arrays[i] == NULL) {
+            continue;
+        }
+
+        for (int i2 = 0; i2 < array_len[i]; i2++) {
+            merged_array[ix++] = arrays[i][i2];
+        }
+    }
+
+    /* Sort resulting array */
+    if (len > 1) {
+        qsort(merged_array, len, sizeof(*merged_array), cmpstringp);
+    }
+
+    /* Unique the array */
+    prev = 0;
+    for (int i = 1; i < len; i++) {
+        if (strcmp(merged_array[prev], merged_array[i])) {
+            merged_array[++prev] = merged_array[i];
+        }
+    }
+    merged_array[++prev] = NULL;
+
+    return merged_array;
+}
+
 /**
  * Frees string array
  * @param[in]   count   Number of items in array.

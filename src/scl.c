@@ -32,6 +32,7 @@ static void print_usage( const char *name ) {
                  "    enable|run            run given command from Software Collection \n"
                  "    load|unload           enable/disable collection in current shell\n"
                  "    list-collections      list installed Software Collections\n"
+                 "    list-enabled          list Software Collections enabled in current shell\n"
                  "    list-packages         list pacages in Sofware Collection\n"
                  "    man                   show manual paga about Software Collection\n"
                  "    register|deregister   register/deregister Sofware Collection\n"
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
 	int ret = EOK;
     struct scl_args *args;
     char **pkgs = NULL;
-    char **colls = NULL;
+    char **colls = NULL, **colls2 = NULL, **colls_merged = NULL;
 
     ret = scl_args_get(argc, argv, &args);
     if (ret == EINPUT) {
@@ -68,7 +69,6 @@ int main(int argc, char *argv[]) {
             ret = fallback_get_installed_collections(&colls);
             if (ret == EOK) {
                 print_string_array(colls);
-                free_string_array(colls);
             }
             break;
 
@@ -76,7 +76,6 @@ int main(int argc, char *argv[]) {
             ret = list_packages_in_collection(args->collections[0], &pkgs);
             if (ret == EOK) {
                 print_string_array(pkgs);
-                free_string_array(pkgs);
             }
             break;
 
@@ -104,10 +103,35 @@ int main(int argc, char *argv[]) {
         case ACTION_VERSION:
             printf("%s\n", get_version());
             break;
+        case ACTION_LIST_ENABLED:
+            /* Get enabled collections of new type */
+            ret = get_enabled_collections(&colls);
+            if (ret != EOK) {
+                break;
+            }
+            /* Get enabled collections of old type */
+            ret = fallback_get_enabled_collections(&colls2);
+            if (ret != EOK) {
+                break;
+            }
+
+            /*
+             * Some new collections can behave like old collections by defining
+             * variable X_SCLS. There may be intersection between colls and
+             * colls2. So merge them.
+             */
+            colls_merged = merge_string_arrays(colls, colls2);
+            print_string_array(colls_merged);
+
+            break;
     }
 
     scl_args_free(args);
     free(args);
+    free_string_array(pkgs);
+    free_string_array(colls);
+    free_string_array(colls2);
+    free_string_array(colls_merged);
     release_scllib_cache();
     return ret;
 }

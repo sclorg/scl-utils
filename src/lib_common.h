@@ -13,5 +13,6 @@ void print_string_array(char *const *array);
 void *free_string_array(char **array);
 char *strip_trailing_slashes(const char *path_to_strip);
 char *directory_name(const char *_path);
+char **merge_string_arrays(char *const *array1, char *const *array2);
 
 #endif
