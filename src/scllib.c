@@ -648,11 +648,6 @@ scl_rc show_man(const char *colname)
     bool exists;
     bool need_fallback = false;
 
-    ret = collection_exists(colname, &exists);
-    if (ret != EOK) {
-        return ret;
-    }
-
     if (!exists) {
         ret = fallback_collection_exists(colname, &exists);
         if (ret != EOK) {
