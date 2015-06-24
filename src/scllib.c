@@ -184,6 +184,16 @@ exit:
     return ret;
 }
 
+/*
+ * Return true in output parameter _exists if a collection given by parameter
+ * colname exists. This function works only for new type of collections i. e.
+ * collections containing module file. In other words it returns true only
+ * when a given collection exists and the collection is collection of new
+ * type otherwise it returns false.
+ *
+ * There is also function fallback_collection_exists() which
+ * returns true for all existing collections no matter of their types.
+ */
 static scl_rc collection_exists(const char *colname, bool *_exists)
 {
     int ret = EOK;

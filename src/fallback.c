@@ -70,6 +70,9 @@ bool fallback_is_collection_enabled(const char *colname)
     return ret;
 }
 
+/*
+ * See function collection_exists()
+ */
 scl_rc fallback_collection_exists(const char *colname, bool *_exists)
 {
     char *col_path = NULL;
