@@ -13,6 +13,13 @@
 scl_rc run_command(char *const colname[], const char *cmd, bool exec);
 
 /*
+ * Get collections enabled in current environment.
+ * @param[out] enabled_collections  NULL-terminated array of char*
+ * @return                          EOK on succes otherwise err code
+ */
+scl_rc get_enabled_collections(char ***enabled_collections);
+
+/*
  * Created array of installed collections.
  * @param[out] _collnames   NULL-terminated array of char*
  * @return                  EOK on succes otherwise err code

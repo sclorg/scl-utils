@@ -93,6 +93,29 @@ exit:
     output = _free(output);
     return ret;
 }
+scl_rc get_enabled_collections(char ***_enabled_collections)
+{
+    char **enabled_collections = NULL;
+    char *lm_files = getenv("_LMFILES_");
+
+    if (lm_files != NULL) {
+        lm_files = xstrdup(lm_files);
+        enabled_collections = split(lm_files, ':');
+
+        for (int i = 0; enabled_collections[i] != NULL; i++) {
+            if (!strncmp(SCL_MODULES_PATH, enabled_collections[i],
+                sizeof(SCL_MODULES_PATH - 1))){
+
+                enabled_collections[i] += sizeof(SCL_MODULES_PATH);
+                enabled_collections[i] = xstrdup(enabled_collections[i]);
+            }
+        }
+
+    }
+    lm_files = _free(lm_files);
+    *_enabled_collections = enabled_collections;
+    return EOK;
+}
 
 scl_rc get_installed_collections(char *const **_colnames)
 {
@@ -161,6 +184,16 @@ exit:
     return ret;
 }
 
+/*
+ * Return true in output parameter _exists if a collection given by parameter
+ * colname exists. This function works only for new type of collections i. e.
+ * collections containing module file. In other words it returns true only
+ * when a given collection exists and the collection is collection of new
+ * type otherwise it returns false.
+ *
+ * There is also function fallback_collection_exists() which
+ * returns true for all existing collections no matter of their types.
+ */
 static scl_rc collection_exists(const char *colname, bool *_exists)
 {
     int ret = EOK;
@@ -624,11 +657,6 @@ scl_rc show_man(const char *colname)
     char *cmd = NULL;
     bool exists;
     bool need_fallback = false;
-
-    ret = collection_exists(colname, &exists);
-    if (ret != EOK) {
-        return ret;
-    }
 
     if (!exists) {
         ret = fallback_collection_exists(colname, &exists);

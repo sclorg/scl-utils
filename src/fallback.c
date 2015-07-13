@@ -30,32 +30,49 @@ bool has_old_collection(char * const colnames[])
     return false;
 }
 
-bool fallback_is_collection_enabled(const char *colname)
+scl_rc fallback_get_enabled_collections(char ***_enabled_collections)
 {
-    char *X_SCLS;
-    bool ret = false;
-    char **enabled_cols, **cols;
-
-    X_SCLS = getenv("X_SCLS");
+    char **enabled_collections = NULL;
+    char *X_SCLS = getenv("X_SCLS");
 
     if (X_SCLS != NULL) {
         X_SCLS = xstrdup(X_SCLS);
-        cols = enabled_cols = split(X_SCLS, ' ');
+        enabled_collections = split(X_SCLS, ' ');
 
-        while(*cols != NULL) {
-            if (!strcmp(*cols, colname)) {
+        for (int i = 0; enabled_collections[i] != NULL; i++) {
+            enabled_collections[i] = xstrdup(enabled_collections[i]);
+        }
+    }
+    X_SCLS = _free(X_SCLS);
+    *_enabled_collections = enabled_collections;
+
+    return EOK;
+}
+
+bool fallback_is_collection_enabled(const char *colname)
+{
+    bool ret = false;
+    char **enabled_collections = NULL;
+
+    ret = fallback_get_enabled_collections(&enabled_collections);
+
+    if (ret == EOK && enabled_collections != NULL) {
+        for (int i = 0; enabled_collections[i] != NULL; i++) {
+            if (!strcmp(enabled_collections[i], colname)) {
                 ret = true;
                 break;
             }
-            cols++;
         }
-        enabled_cols = _free(enabled_cols);
-        X_SCLS = _free(X_SCLS);
+
     }
+    enabled_collections = free_string_array(enabled_collections);
 
     return ret;
 }
 
+/*
+ * See function collection_exists()
+ */
 scl_rc fallback_collection_exists(const char *colname, bool *_exists)
 {
     char *col_path = NULL;

@@ -386,6 +386,8 @@ int scl_args_get(int argc, char *argv[], struct scl_args **_args)
         }
     } else if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "-V")) {
         args->action = ACTION_VERSION;
+    } else if (!strcmp(argv[1], "list-enabled")) {
+        args->action = ACTION_LIST_ENABLED;
     } else {
         ret = EINPUT;
         goto fail;
