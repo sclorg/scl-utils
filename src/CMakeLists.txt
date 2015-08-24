@@ -4,7 +4,7 @@ SET(MODULE_CMD "/usr/bin/modulecmd" )
 SET(CONF_DIR "/etc/scl/conf/" )
 CONFIGURE_FILE( config.h.cmake config.h )
 
-SET( CMAKE_C_FLAGS "-Wall -pedantic --std=gnu99 -D_GNU_SOURCE -g" )
+SET( CMAKE_C_FLAGS "-Wall -pedantic --std=gnu99 -D_GNU_SOURCE -g ${CMAKE_C_FLAGS}" )
 INCLUDE_DIRECTORIES ("${PROJECT_BINARY_DIR}/src")
 list(APPEND SOURCES scl.c debug.c scllib.c lib_common.c args.c sclmalloc.c fallback.c)
 ADD_EXECUTABLE (scl ${SOURCES})
