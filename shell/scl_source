@@ -9,7 +9,7 @@ Options:
 
 if [ $# -eq 0 -o X"$1" = X"-h" -o X"$1" = X"--help" ]; then
     echo "$_scl_source_help"
-    return 0
+    return 1
 fi
 
 
