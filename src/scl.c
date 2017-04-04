@@ -33,8 +33,8 @@ static void print_usage( const char *name ) {
                  "    load|unload           enable/disable collection in current shell\n"
                  "    list-collections      list installed Software Collections\n"
                  "    list-enabled          list Software Collections enabled in current shell\n"
-                 "    list-packages         list pacages in Sofware Collection\n"
-                 "    man                   show manual paga about Software Collection\n"
+                 "    list-packages         list packages in Sofware Collection\n"
+                 "    man                   show manual page about Software Collection\n"
                  "    register|deregister   register/deregister Sofware Collection\n"
                  "    --help                show this help\n"
                  "\nUse '-' as <command> to read the command from standard input.\n");
