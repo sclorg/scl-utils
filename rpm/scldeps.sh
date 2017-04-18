@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# Read all the input!
+cat > /dev/null
+
 [ $# -ge 2 ] || {
-    cat > /dev/null
     exit 0
 }
 
@@ -13,7 +15,7 @@ case $option in
     echo -n "scl-package($1)"
     ;;
 -R|--requires)
-    for o in $@; do
+    for o in "$@"; do
         echo "$o"
     done
     ;;
