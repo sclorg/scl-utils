@@ -105,7 +105,7 @@ scl_rc prepare_args(const char *cmd, char ***_argv)
     int i;
 
     if (wordexp(cmd, &p, 0) != 0) {
-        debug("Problem occured during parsing command!!!\n");
+        debug("Problem occurred during parsing command!!!\n");
         return EINPUT;
     }
     argv = xmalloc((p.we_wordc + 1) * sizeof(*argv));

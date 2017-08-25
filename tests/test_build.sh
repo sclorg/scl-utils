@@ -7,7 +7,7 @@ TEST="Collections test"
 rpmdir=`pwd`/rpmdir
 
 rlJournalStart
-    rlPhaseStartTest "buidling collections"
+    rlPhaseStartTest "building collections"
         for col_srpm_dir in SRPMS/*; do
             rm -rf $rpmdir
             mkdir $rpmdir
@@ -28,7 +28,7 @@ rlJournalStart
             echo $non_runtime_packages;
             for package in $non_runtime_packages; do
                 rpm -qpR $package | grep ${colname}-runtime
-                rlAssert0 "Check if `basename $package` requries ${colname}-runtime" $?
+                rlAssert0 "Check if `basename $package` requires ${colname}-runtime" $?
             done
         done
     rlPhaseEnd
