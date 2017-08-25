@@ -5,6 +5,7 @@
 
 %scl_debug() %{expand:
 %define old_debug %{lua:print(rpm.expand("%{debug_package}"):len())}
+%undefine _debugsource_packages
 %global debug_package %{expand:
 %if "%{?old_debug}" == "0"
        %{expand: %{nil}}
