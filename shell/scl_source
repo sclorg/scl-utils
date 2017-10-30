@@ -9,7 +9,7 @@ Options:
 
 if [ $# -eq 0 -o $1 = "-h" -o $1 = "--help" ]; then
     echo "$_scl_source_help"
-    return 0
+    exit 0
 fi
 
 
@@ -36,7 +36,7 @@ for arg in "$@"; do
     _scl_prefix=`cat $_scl_prefix_file 2> /dev/null`
     if [ $? -ne 0 ]; then
         echo "Can't read $_scl_prefix_file, $arg is probably not installed."
-        return 1
+        exit 1
     fi
   
     # First check if the collection is already in the list
