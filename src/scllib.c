@@ -376,7 +376,7 @@ scl_rc list_packages_in_collection(const char *colname, char ***_pkgnames)
     }
 
     if (rpmReadConfigFiles(NULL, NULL) == -1) {
-        debug("Error occured in rpmlib!\n");
+        debug("Error occurred in rpmlib!\n");
         return ERPMLIB;
     }
 
@@ -529,14 +529,14 @@ scl_rc register_collection(const char *_colpath)
         if (unlink(conf_file)) {
             debug("Unable to remove file %s: %s\n", conf_file,
                 strerror(errno));
-            debug("Remove this file manualy before a new try to register collection\n");
+            debug("Remove this file manually before a new try to register collection\n");
         }
 
         if (access(module_file_link, F_OK) == 0) {
             if (unlink(module_file_link)) {
                 debug("Unable to remove file %s: %s\n", module_file_link,
                     strerror(errno));
-                debug("Remove this file manualy before a new try to register collection\n");
+                debug("Remove this file manually before a new try to register collection\n");
             }
         }
     }
@@ -562,7 +562,7 @@ static scl_rc owned_by_package(const char *file_path, bool *_owned)
     scl_rc ret = EOK;
 
     if (rpmReadConfigFiles(NULL, NULL) == -1) {
-        debug("Error occured in rpmlib!\n");
+        debug("Error occurred in rpmlib!\n");
         return ERPMLIB;
     }
 
@@ -657,6 +657,11 @@ scl_rc show_man(const char *colname)
     char *cmd = NULL;
     bool exists;
     bool need_fallback = false;
+
+    ret = collection_exists(colname, &exists);
+    if (ret != EOK) {
+        return ret;
+    }
 
     if (!exists) {
         ret = fallback_collection_exists(colname, &exists);

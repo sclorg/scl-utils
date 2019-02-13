@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(scl-utils C)
 SET(scl_VERSION_MAJOR 2)
 SET(scl_VERSION_MINOR 0)
-SET(scl_VERSION_PATCH 1)
+SET(scl_VERSION_PATCH 2)
 
 IF(DEFINED scl_VERSION_PATCH)
 SET(scl_VERSION
@@ -37,13 +37,21 @@ FILE(GLOB rpmHelpers "rpm/brp-scl-*")
 INSTALL(PROGRAMS ${rpmHelpers} rpm/scldeps.sh DESTINATION /usr/lib/rpm)
 
 INSTALL(FILES doc/scl.1 DESTINATION share/man/man1)
-INSTALL(FILES shell/scl-completion.bash DESTINATION /etc/bash_completion.d)
 INSTALL(PROGRAMS shell/scl_enabled DESTINATION /usr/bin)
 INSTALL(PROGRAMS shell/scl_source DESTINATION /usr/bin)
 
 INSTALL(FILES shell/scl-init.sh DESTINATION /etc/profile.d)
 INSTALL(FILES shell/scl-init.csh DESTINATION /etc/profile.d)
 INSTALL(FILES shell/func_scl.csh DESTINATION /etc/scl)
+
+FIND_PACKAGE(bash-completion)
+IF(BASH_COMPLETION_FOUND)
+  MESSAGE(STATUS "Using bash completion dir ${BASH_COMPLETION_COMPLETIONSDIR}")
+ELSE()
+  SET(BASH_COMPLETION_COMPLETIONSDIR "/etc/bash_completion.d")
+  MESSAGE(STATUS "Using fallback bash completion dir ${BASH_COMPLETION_COMPLETIONSDIR}")
+ENDIF()
+INSTALL(FILES shell/scl-completion.bash DESTINATION ${BASH_COMPLETION_COMPLETIONSDIR} RENAME scl)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 ENABLE_TESTING()

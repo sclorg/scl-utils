@@ -5,6 +5,7 @@
 
 %scl_debug() %{expand:
 %define old_debug %{lua:print(rpm.expand("%{debug_package}"):len())}
+%undefine _debugsource_packages
 %global debug_package %{expand:
 %if "%{?old_debug}" == "0"
        %{expand: %{nil}}
@@ -91,7 +92,6 @@ package or when debugging this package.
     /usr/lib/rpm/brp-strip-static-archive %{__strip}
     /usr/lib/rpm/brp-scl-python-bytecompile %{__python} %{?_python_bytecompile_errors_terminate_build} %{_scl_root}
     /usr/lib/rpm/brp-python-hardlink
-    %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
 %{nil}}
 BuildRequires: scl-utils-build
 %if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
