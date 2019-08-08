@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <wordexp.h>
+#include <assert.h>
 
 #include "errors.h"
 #include "scllib.h"
@@ -268,6 +269,10 @@ char **merge_string_arrays(char *const *array1, char *const *array2)
         }
     }
     merged_array[++prev] = NULL;
+
+    for (int i = 0; i < prev; i++) {
+        merged_array[i] = xstrdup(merged_array[i]);
+    }
 
     return merged_array;
 }
