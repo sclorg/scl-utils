@@ -107,8 +107,8 @@ scl_rc get_enabled_collections(char ***_enabled_collections)
                 sizeof(SCL_MODULES_PATH - 1))){
 
                 enabled_collections[i] += sizeof(SCL_MODULES_PATH);
-                enabled_collections[i] = xstrdup(enabled_collections[i]);
             }
+            enabled_collections[i] = xstrdup(enabled_collections[i]);
         }
 
     }
