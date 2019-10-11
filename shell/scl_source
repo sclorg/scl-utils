@@ -9,8 +9,7 @@ Options:
 
 if [ $# -eq 0 -o "$1" = "-h" -o "$1" = "--help" ]; then
     echo "$_scl_source_help"
-    return 0
-fi
+else # main operation mode
 
 
 if [ -z "$_recursion" ]; then
@@ -73,3 +72,5 @@ if [ $_recursion == "false" ]; then
     _scl_scriptlet_name=""
     _recursion="false"
 fi
+
+fi # main operation mode
