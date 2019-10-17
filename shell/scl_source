@@ -1,5 +1,24 @@
 #!/bin/bash
 
+if [ -n "${ZSH_VERSION-}" ]; then
+    # Enable some bourne shell compatibility zsh options
+    _scl_zsh_opts_restore=()
+    for _scl_zsh_opt in bsdecho globsubst ksharrays nomatch shwordsplit; do
+      if ! setopt |/bin/grep -q "^$_scl_zsh_opt$"; then
+        setopt "$_scl_zsh_opt"
+        _scl_zsh_opts_restore+=("no$_scl_zsh_opt")
+      fi
+    done
+    _scl_prereturn() {
+        # Restore zsh options before return
+        for _scl_zsh_opt in "${_scl_zsh_opts_restore[@]}"; do
+            setopt "$_scl_zsh_opt"
+        done
+    }
+else
+    _scl_prereturn() { :; }
+fi
+
 _scl_source_help="Usage: source scl_source <action> [<collection> ...]
 
 Don't use this script outside of SCL scriptlets!
@@ -9,6 +28,7 @@ Options:
 
 if [ $# -eq 0 -o "$1" = "-h" -o "$1" = "--help" ]; then
     echo "$_scl_source_help"
+    _scl_prereturn
     return 0
 fi
 
@@ -36,13 +56,14 @@ for arg in "$@"; do
     _scl_prefix=`cat $_scl_prefix_file 2> /dev/null`
     if [ $? -ne 0 ]; then
         echo "Can't read $_scl_prefix_file, $arg is probably not installed."
+	_scl_prereturn
         return 1
     fi
   
     # First check if the collection is already in the list
     # of collections to be enabled
     for scl in ${_scls[@]}; do
-        if [ $arg == $scl ]; then
+        if [ "$arg" = "$scl" ]; then
             continue 2
         fi
     done
@@ -55,7 +76,7 @@ for arg in "$@"; do
     fi;
 done
 
-if [ $_recursion == "false" ]; then
+if [ "$_recursion" = "false" ]; then
     _i=0
     _recursion="true"
     while [ $_i -lt ${#_scls[@]} ]; do
@@ -73,3 +94,6 @@ if [ $_recursion == "false" ]; then
     _scl_scriptlet_name=""
     _recursion="false"
 fi
+
+_scl_prereturn
+return 0
