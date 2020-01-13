@@ -52,7 +52,7 @@ static scl_rc get_env_vars(const char *colname, char ***_vars)
     char *argv[] = {MODULE_CMD, MODULE_CMD, "sh", "add", "", NULL};
     char *output = NULL;
     int i = 0;
-    char **parts, **vars;
+    char **parts, *part, **vars;
     scl_rc ret = EOK;
 
     ret = initialize_env();
@@ -73,16 +73,21 @@ static scl_rc get_env_vars(const char *colname, char ***_vars)
      * Expected format of string stored in variable output is following:
      * var1=value1 ;export value1 ; var2=value2 ;export value2;
      * var3=value\ with\ spaces
+     * NOTE: Newer (tcl-based) versions of MODULE_CMD put a newline after each
+     * export command so we need to take that into account.
      */
 
     vars = parts = split(output, ';');
 
     /* Filter out strings without "=" i. e. strings with export. */
-    while (*parts !=  NULL) {
-        if (strchr(*parts, '=')) {
-            strip_trailing_chars(*parts, ' ');
-            unescape_string(*parts);
-            vars[i++] = xstrdup(*parts);
+    while (*parts != NULL) {
+        part = *parts;
+        if (part[0] == '\n')
+            part++;
+        if (strchr(part, '=')) {
+            strip_trailing_chars(part, ' ');
+            unescape_string(part);
+            vars[i++] = xstrdup(part);
         }
         parts++;
     }

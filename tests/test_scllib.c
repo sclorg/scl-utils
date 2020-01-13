@@ -215,6 +215,21 @@ static void test_run_command(void **state)
             .ret = EOK,
         },
 
+        /* Newlines in module(1) output are stripped */
+        {
+            .col_list =
+                "/etc/scl/modulefiles:\n"
+                "scl1\n",
+
+            .env_vars =
+                "LD_LIBRARY_PATH=/opt/rh/scl1/root/usr/lib64; export LD_LIBRARY_PATH;\n"
+                "PATH=/opt/rh/scl1/root/usr/bin; export PATH;",
+
+            .expected_env_path = "/opt/rh/scl1/root/usr/bin",
+            .collections = (char *[]) {"scl1", NULL},
+            .ret = EOK,
+        },
+
         /* Try to enable non-existing collection */
         {
             .col_list =
