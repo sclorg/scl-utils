@@ -4,10 +4,33 @@
 #include <cmocka.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "test_common.h"
+#include "dict.h"
 #include "../src/scllib.h"
 #include "../src/errors.h"
+
+extern int __real_putenv();
+extern char *__real_getenv();
+dict env;
+
+int __wrap_putenv(char *string)
+{
+    if (env)
+        return dict_put(&env, string);
+    return __real_putenv(string);
+}
+
+char *__wrap_getenv(const char *name)
+{
+    char *value;
+    if (env && (value = dict_get(env, name)))
+        return value;
+    return __real_getenv(name);
+}
 
 char *__wrap_get_command_output(const char *path, char *const argv[], int fileno)
 {
@@ -215,6 +238,7 @@ static void test_run_command(void **state)
     int tc_count = sizeof(testcases) / sizeof(testcases[0]);
 
     for (int i = 0; i < tc_count; i++) {
+        env = dict_init();
         release_scllib_cache();
 
         if (testcases[i].col_list)
@@ -229,6 +253,7 @@ static void test_run_command(void **state)
 
         ret = run_command(testcases[i].collections, "test_cmd", false);
         assert_int_equal(ret, testcases[i].ret);
+        dict_free(env);
     }
 
 }
