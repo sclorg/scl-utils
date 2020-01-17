@@ -260,10 +260,10 @@ static void test_run_command(void **state)
 
 int main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_get_installed_collections),
-        unit_test(test_run_command),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_get_installed_collections),
+        cmocka_unit_test(test_run_command),
     };
 
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
