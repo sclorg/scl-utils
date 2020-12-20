@@ -7,3 +7,7 @@ if (! $?MODULEPATH ) then
 endif
 
 setenv MODULEPATH /etc/scl/modulefiles:$MODULEPATH
+
+if ( -f ${HOME}/.sclload ) then
+  scl load `cat ${HOME}/.sclload`
+endfi
