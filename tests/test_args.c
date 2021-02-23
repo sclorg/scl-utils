@@ -241,11 +241,11 @@ static void test_scl_args_get_run_command(void **state)
 
 int main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_scl_args_get_basic_args),
-        unit_test(test_scl_args_get_register_deregister),
-        unit_test(test_scl_args_get_run_command),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_scl_args_get_basic_args),
+        cmocka_unit_test(test_scl_args_get_register_deregister),
+        cmocka_unit_test(test_scl_args_get_run_command),
     };
 
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -4,10 +4,33 @@
 #include <cmocka.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "test_common.h"
+#include "dict.h"
 #include "../src/scllib.h"
 #include "../src/errors.h"
+
+extern int __real_putenv();
+extern char *__real_getenv();
+dict env;
+
+int __wrap_putenv(char *string)
+{
+    if (env)
+        return dict_put(&env, string);
+    return __real_putenv(string);
+}
+
+char *__wrap_getenv(const char *name)
+{
+    char *value;
+    if (env && (value = dict_get(env, name)))
+        return value;
+    return __real_getenv(name);
+}
 
 char *__wrap_get_command_output(const char *path, char *const argv[], int fileno)
 {
@@ -192,6 +215,21 @@ static void test_run_command(void **state)
             .ret = EOK,
         },
 
+        /* Newlines in module(1) output are stripped */
+        {
+            .col_list =
+                "/etc/scl/modulefiles:\n"
+                "scl1\n",
+
+            .env_vars =
+                "LD_LIBRARY_PATH=/opt/rh/scl1/root/usr/lib64; export LD_LIBRARY_PATH;\n"
+                "PATH=/opt/rh/scl1/root/usr/bin; export PATH;",
+
+            .expected_env_path = "/opt/rh/scl1/root/usr/bin",
+            .collections = (char *[]) {"scl1", NULL},
+            .ret = EOK,
+        },
+
         /* Try to enable non-existing collection */
         {
             .col_list =
@@ -215,6 +253,7 @@ static void test_run_command(void **state)
     int tc_count = sizeof(testcases) / sizeof(testcases[0]);
 
     for (int i = 0; i < tc_count; i++) {
+        env = dict_init();
         release_scllib_cache();
 
         if (testcases[i].col_list)
@@ -229,16 +268,17 @@ static void test_run_command(void **state)
 
         ret = run_command(testcases[i].collections, "test_cmd", false);
         assert_int_equal(ret, testcases[i].ret);
+        dict_free(env);
     }
 
 }
 
 int main(void)
 {
-    const UnitTest tests[] = {
-        unit_test(test_get_installed_collections),
-        unit_test(test_run_command),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_get_installed_collections),
+        cmocka_unit_test(test_run_command),
     };
 
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
