@@ -9,8 +9,12 @@ else
 fi
 }
 
-shell=`/bin/basename \`/bin/ps -p $$ -ocomm=\``
-[ "$shell" = "bash" ] && export -f scl # export -f works only in bash
+if [ -v SHELL ]; then
+   [[ $SHELL =~ \/bash$ ]] && export -f scl # export -f works only in bash
+else
+   shell=`/bin/basename \`/bin/ps -p $$ -ocomm=\``
+   [ "$shell" = "bash" ] && export -f scl # export -f works only in bash
+fi
 
 MODULESHOME=/usr/share/Modules
 export MODULESHOME
