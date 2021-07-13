@@ -34,7 +34,7 @@ for arg in "$@"; do
     _scl_prefix_file=$_scl_dir/$arg
     _scl_prefix=`cat $_scl_prefix_file 2> /dev/null`
     if [ $? -ne 0 ]; then
-        echo "Can't read $_scl_prefix_file, $arg is probably not installed."
+        echo >&2 "Can't read $_scl_prefix_file, $arg is probably not installed."
         return 1
     fi
   
@@ -60,7 +60,7 @@ if [ $_recursion == "false" ]; then
         _scl_scriptlet_path="${_scl_prefixes[$_i]}/${_scls[$_i]}/${_scl_scriptlet_name}"
         source "$_scl_scriptlet_path"
         if [ $? -ne 0 ]; then
-            echo "Can't source $_scl_scriptlet_name, skipping."
+            echo >&2 "Can't source $_scl_scriptlet_name, skipping."
         else
             export X_SCLS="${_scls[$_i]} $X_SCLS"
         fi;
