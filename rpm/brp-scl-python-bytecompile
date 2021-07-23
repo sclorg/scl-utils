@@ -10,7 +10,7 @@ fi
 [ "0$scl_path" = "0" ] && exit 0
 
 # If we don't have a python interpreter, avoid changing anything.
-default_python=${1:-/usr/bin/python}
+default_python=${1:-/usr/bin/python3}
 if [ ! -x "$default_python" ]; then
 	exit 0
 fi
