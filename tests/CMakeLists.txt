@@ -1,6 +1,6 @@
 ENABLE_TESTING()
 INCLUDE_DIRECTORIES(. ../src ${PROJECT_BINARY_DIR}/src )
-SET( CMAKE_C_FLAGS "-Wall -pedantic --std=gnu99 -D_GNU_SOURCE -g -Wl,--wrap=get_command_output -Wl,--wrap=system -Wl,--wrap=putenv -Wl,--wrap=getenv ${CMAKE_C_FLAGS}" )
+SET( CMAKE_C_FLAGS "-Wall -pedantic --std=gnu99 -D_GNU_SOURCE -g -fPIE -Wl,--wrap=get_command_output -Wl,--wrap=system -Wl,--wrap=putenv -Wl,--wrap=getenv" )
 
 
 SET(tested_sources ../src/scllib.c ../src/sclmalloc.c ../src/lib_common.c ../src/debug.c ../src/fallback.c)
