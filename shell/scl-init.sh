@@ -23,4 +23,6 @@ MODULEPATH=/etc/scl/modulefiles:$MODULEPATH
 
 export MODULEPATH
 
-
+if [ -r ${HOME}/.sclload ]; then
+  scl load `cat ${HOME}/.sclload`
+fi
