@@ -11,6 +11,7 @@
 #include <rpm/rpmcli.h>
 #include <errno.h>
 #include <wordexp.h>
+#include <signal.h>
 
 #include "config.h"
 #include "errors.h"
@@ -341,6 +342,8 @@ scl_rc run_command(char * const colnames[], const char *cmd, bool exec)
 
         status = system(cmd);
         if (status == -1 || !WIFEXITED(status)) {
+            if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+                goto exit;
             debug("Problem with executing program \"%s\"\n", cmd);
             ret = ERUN;
             goto exit;
