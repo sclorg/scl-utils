@@ -6,6 +6,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <signal.h>
 
 #include "scllib.h"
 #include "sclmalloc.h"
@@ -229,6 +230,8 @@ scl_rc fallback_run_command(char * const colnames[], const char *cmd, bool exec)
         xasprintf(&bash_cmd, "/bin/bash %s", tmp);
         status = system(bash_cmd);
         if (status == -1 || !WIFEXITED(status)) {
+            if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT)
+                goto exit;
             debug("Problem with executing command \"%s\"\n", bash_cmd);
             ret = ERUN;
             goto exit;
