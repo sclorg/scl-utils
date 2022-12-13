@@ -246,6 +246,7 @@ exit:
     enable_path = _free(enable_path);
     colpath = _free(colpath);
     bash_cmd = _free(bash_cmd);
+    unlink(tmp);
 
     return ret;
 }
