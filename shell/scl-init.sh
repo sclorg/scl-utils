@@ -9,8 +9,7 @@ else
 fi
 }
 
-shell=`/bin/basename \`/bin/ps -p $$ -ocomm=\``
-[ "$shell" = "bash" ] && export -f scl # export -f works only in bash
+[ -n "${BASH:-}" ] && export -f scl # export -f works only in bash
 
 MODULESHOME=/usr/share/Modules
 export MODULESHOME
@@ -22,5 +21,3 @@ fi
 MODULEPATH=/etc/scl/modulefiles:$MODULEPATH
 
 export MODULEPATH
-
-
