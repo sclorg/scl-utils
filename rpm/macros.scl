@@ -91,7 +91,7 @@ package or when debugging this package.
     }
     /usr/lib/rpm/brp-strip-static-archive %{__strip}
     /usr/lib/rpm/brp-scl-python-bytecompile %{__python3} %{?_python_bytecompile_errors_terminate_build} %{_scl_root}
-    /usr/lib/rpm/brp-python-hardlink
+    [ -f /usr/lib/rpm/redhat/brp-python-hardlink ] && /usr/lib/rpm/redhat/brp-python-hardlink || /usr/lib/rpm/brp-python-hardlink
 %{nil}}
 BuildRequires: scl-utils-build
 %if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
