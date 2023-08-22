@@ -39,7 +39,7 @@ package or when debugging this package.
 
 %scl_prefix()   %{?scl:%(if [ "%1" = "%%1" ]; then echo "%{scl}-"; else echo "%1-"; fi)}%{!?scl:%{nil}}
 
-%scl_package() %{expand:%{!?_root_prefix:
+%scl_package() %{expand:%{!?scl_name:
 %global pkg_name		%1
 %global scl_name		%{scl}
 %global scl_runtime		%{scl}-runtime
