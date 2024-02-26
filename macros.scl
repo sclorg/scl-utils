@@ -1,0 +1,75 @@
+# scl-utils RPM macros
+#
+# Copyright (C) 2012 Red Hat, Inc.
+#   Written by Jindrich Novy <jnovy@redhat.com>.
+
+%scl_package() %{expand:%{!?_root_prefix:
+%global pkg_name		%1
+%global scl_name		%{scl}
+%global scl_prefix		%{scl}-
+%global scl_runtime		%{scl}-runtime
+%{!?_scl_prefix:		%global _scl_prefix /opt/rh}
+%global _scl_scripts		%{_scl_prefix}/%{scl}
+%global _scl_root		%{_scl_prefix}/%{scl}/root
+%global _root_prefix		%{_prefix}
+%global _root_exec_prefix	%{_root_prefix}
+%global _root_bindir		%{_exec_prefix}/bin
+%global _root_sbindir		%{_exec_prefix}/sbin
+%global _root_libexecdir	%{_exec_prefix}/libexec
+%global _root_datadir		%{_prefix}/share
+%global _root_sysconfdir	%{_sysconfdir}
+%global _root_sharedstatedir	%{_prefix}/com
+%global _root_localstatedir	%{_localstatedir}
+%global _root_libdir		%{_exec_prefix}/%{_lib}
+%global _root_includedir	%{_prefix}/include
+%global _root_infodir		%{_datadir}/info
+%global _root_mandir		%{_datadir}/man
+%global _root_initddir		%{_sysconfdir}/rc.d/init.d
+%global _prefix			%{_scl_root}/usr
+%global _exec_prefix		%{_prefix}
+%global _bindir			%{_exec_prefix}/bin
+%global _sbindir		%{_exec_prefix}/sbin
+%global _libexecdir		%{_exec_prefix}/libexec
+%global _datadir		%{_prefix}/share
+%global _sysconfdir		%{_scl_root}/etc
+%global _sharedstatedir		%{_prefix}/com
+%global _localstatedir		%{_scl_root}/var
+%global _libdir			%{_exec_prefix}/%{_lib}
+%global _includedir		%{_prefix}/include
+%global _infodir		%{_datadir}/info
+%global _mandir			%{_datadir}/man
+%global _docdir			%{_datadir}/doc
+%global _defaultdocdir		%{_docdir}
+%global scl_pkg_name		%{scl}-%{pkg_name}
+%global __os_install_post %{expand:
+    /usr/lib/rpm/brp-scl-compress %{_scl_root}
+    %{!?__debug_package:/usr/lib/rpm/redhat/brp-strip %{__strip}
+    /usr/lib/rpm/redhat/brp-strip-comment-note %{__strip} %{__objdump}
+    }
+    /usr/lib/rpm/redhat/brp-strip-static-archive %{__strip}
+    /usr/lib/rpm/brp-scl-python-bytecompile %{__python} %{?_python_bytecompile_errors_terminate_build} %{_scl_root}
+    /usr/lib/rpm/redhat/brp-python-hardlink
+    %{!?__jar_repack:/usr/lib/rpm/redhat/brp-java-repack-jars}
+%{nil}}
+%global debug_package %{expand:
+%ifnarch noarch
+%global __debug_package 1
+%package debuginfo
+Summary: Debug information for package %{name}
+Group: Development/Debug
+AutoReqProv: 0
+Provides: scl-package(%scl)
+%description debuginfo
+This package provides debug information for package %{name}.
+Debug information is useful when developing applications that use this
+package or when debugging this package.
+%files debuginfo -f debugfiles.list
+%defattr(-,root,root)
+%endif
+%{nil}}
+BuildRequires: scl-utils-build
+}}
+
+%scl_require()	%{_scl_prefix}/%1/enable, %1
+%scl_require_package() %1-%2
+
