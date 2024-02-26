@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ $# -le 1 ]; then
+	echo "$0 <collection name> <rpmbuild arguments>"
+else
+	SCL=$1
+	shift
+	rpmbuild $@ --define "scl $SCL"
+fi
