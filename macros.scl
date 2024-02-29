@@ -72,4 +72,3 @@ BuildRequires: scl-utils-build
 
 %scl_require()	%{_scl_prefix}/%1/enable, %1
 %scl_require_package() %1-%2
-
