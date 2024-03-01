@@ -5,7 +5,7 @@ if [ -z "$RPM_BUILD_ROOT" -o "$RPM_BUILD_ROOT" = "/" ]; then
 	exit 0
 fi
 
-scl_path=${1:-opt/*}
+scl_path=${1:-/opt/rh}
 
 cd "$RPM_BUILD_ROOT"
 
