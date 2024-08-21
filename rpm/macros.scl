@@ -10,7 +10,7 @@
 %if "%{?old_debug}" == "0"
        %{expand: %{nil}}
 %else
-%if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
+%if 0
         %{expand: %{nil}}
 %else
 %ifnarch noarch
@@ -94,7 +94,7 @@ package or when debugging this package.
     [ -f /usr/lib/rpm/redhat/brp-python-hardlink ] && /usr/lib/rpm/redhat/brp-python-hardlink || /usr/lib/rpm/brp-python-hardlink
 %{nil}}
 BuildRequires: scl-utils-build
-%if "%{?scl}%{!?scl:0}" == "%{pkg_name}"
+%if 0
 Requires: %{scl_runtime}
 Provides: scl-package(%{scl})
 %endif
